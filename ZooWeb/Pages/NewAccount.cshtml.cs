@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Reflection;
 using ZooWeb.Pages.ZooUsers;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 
 namespace ZooWeb.Pages
 {

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ZooWeb.Pages.AmenitySales;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using System.Linq;

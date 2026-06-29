@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Security.Claims;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using ZooWeb.Pages.Employees;
 
 namespace ZooWeb.Pages.Home

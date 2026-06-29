@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using Isopoh.Cryptography.Argon2;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using ZooWeb.Pages.ZooUsers;
 using System.Data;
 

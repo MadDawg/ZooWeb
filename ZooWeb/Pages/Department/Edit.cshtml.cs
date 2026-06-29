@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ZooWeb.Pages.Department;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Reflection;
 
 namespace ZooWeb.Pages.Department

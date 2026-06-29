@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Reflection;
 using System.Linq;
 using ZooWeb.Pages.Employees;

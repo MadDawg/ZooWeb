@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 using ZooWeb.Pages.Revenue;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Data;
 
 namespace ZooWeb.Pages.FeedingReport

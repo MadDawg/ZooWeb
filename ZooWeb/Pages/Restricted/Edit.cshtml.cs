@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.CodeAnalysis;
 using System.ComponentModel.DataAnnotations;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Reflection;
 
 namespace ZooWeb.Pages.Restricted
