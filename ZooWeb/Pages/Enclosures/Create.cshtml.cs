@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.Enclosures
 {
@@ -10,6 +12,14 @@ namespace ZooWeb.Pages.Enclosures
 		public EnclosureInfo info = new EnclosureInfo();
 		public string errorMsg = "";
 		public string successMsg = "";
+        
+    private readonly IDbConnectionFactory _factory;
+
+    public CreateModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 		public void OnGet()
 		{
 		}
@@ -36,8 +46,7 @@ namespace ZooWeb.Pages.Enclosures
 
 			try
 			{
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+				using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "INSERT INTO Enclosure VALUES (@LocationId, @Type, @Capacity, @OccupantNum)";

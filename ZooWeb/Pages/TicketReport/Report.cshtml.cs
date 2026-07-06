@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.TicketReport
 {
@@ -13,6 +15,13 @@ namespace ZooWeb.Pages.TicketReport
 
         public List<TicketSaleInfo> TicketSaleInfo { get; set; } = new List<TicketSaleInfo>();
         public int TotalTickets { get; set; }
+        
+        private readonly IDbConnectionFactory _factory;
+
+        public ReportModel(IDbConnectionFactory factory)
+        {
+          _factory = factory;
+        }
 
         public void OnGet()
         {
@@ -28,9 +37,7 @@ namespace ZooWeb.Pages.TicketReport
 
                 Console.WriteLine($"PassType: {passType}, EmployeeID: {employeeId}");
 
-                string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (SqlConnection connection = _factory.CreateConnection())
                 {
                     connection.Open();
 

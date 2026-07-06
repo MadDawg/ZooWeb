@@ -10,7 +10,8 @@ CREATE TABLE [dbo].[animal](
 	[Sex] [bit] NOT NULL,
 	[Birth_date] [date] NOT NULL,
 	[Status] [nvarchar](4000) NULL,
-	[Location_ID] [bigint] NULL
+	[Location_ID] [bigint] NULL,
+  [IsDeleted] [bit] NOT NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[animal] ADD PRIMARY KEY CLUSTERED 
@@ -20,6 +21,8 @@ ALTER TABLE [dbo].[animal] ADD PRIMARY KEY CLUSTERED
 GO
 ALTER TABLE [dbo].[animal]  WITH CHECK ADD FOREIGN KEY([Location_ID])
 REFERENCES [dbo].[enclosure] ([LocationID])
+GO
+ALTER TABLE [dbo].[animal] ADD  DEFAULT ((0)) FOR [IsDeleted]
 GO
 SET ANSI_NULLS ON
 GO

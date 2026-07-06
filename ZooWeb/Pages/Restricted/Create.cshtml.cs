@@ -3,20 +3,28 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
 using ZooWeb.Pages.FeedingPatterns;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.Restricted
 {
     public class CreateModel : PageModel
     {
-		public RestrictedInfo info = new RestrictedInfo();
-		public List<EnclosureListTable> enclosureList = new List<EnclosureListTable>();
+        public RestrictedInfo info = new RestrictedInfo();
+        public List<EnclosureListTable> enclosureList = new List<EnclosureListTable>();
         public string errorMsg = "";
-		public string successMsg = "";
+        public string successMsg = "";
+    
+        private readonly IDbConnectionFactory _factory;
+
+        public CreateModel(IDbConnectionFactory factory)
+        {
+          _factory = factory;
+        }
+
         public void OnGet()
         {
-            string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
+				    using (SqlConnection connection = _factory.CreateConnection())
             {
                 connection.Open();
                 String sql = "SELECT LocationID, Type "
@@ -60,8 +68,7 @@ namespace ZooWeb.Pages.Restricted
 
 			try
 			{
-				string connectionString = "Server=tcp:zoowebdbserver.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+				using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "INSERT INTO restricted VALUES (@Location_ID, @Close_date, @Reopen_date)";

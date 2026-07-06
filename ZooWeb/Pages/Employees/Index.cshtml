@@ -7,35 +7,42 @@
 <h2>List of Employees</h2>
 <a class='btn btn-primary btn-sm' href="/Employees/Create">New Employee</a>
 <table class="table">
-	<thead>
-		<tr>
-			<th>Employee Id</th>
-			<th>First Name</th>
-			<th>Last Name</th>
-			<th>Phone Number</th>
-			<th>Department</th>
-			<th>Supervisor Id</th>
-			<th>Email</th>
-			<th>Salary</th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach(var item in Model.listEmployees)
-		{
-			<tr>
-				<td>@item.EmployeeId</td>
-				<td>@item.Fname</td>
-				<td>@item.Lname</td>
-				<td>@item.Phone_num</td>
-				<td>@item.Dno</td>
-				<td>@item.Super_Eid</td>
-				<td>@item.Email</td>
-				<td>@item.Salary</td>
-				<td>
-					<a class='btn btn-primary btn-sm' href="/Employees/Edit?id=@item.EmployeeId">Edit</a>
-					<a class='btn btn-danger btn-sm' href="/Employees/Delete?id=@item.EmployeeId">Delete</a>
-				</td>
-			</tr>
-		}
-	</tbody>
+<thead>
+<tr>
+<th>Employee Id</th>
+<th>First Name</th>
+<th>Last Name</th>
+<th>Phone Number</th>
+<th>Department</th>
+<th>Supervisor Id</th>
+<th>Email</th>
+<th>Salary</th>
+</tr>
+</thead>
+  <tbody>
+@foreach(var item in Model.listEmployees)
+{
+  <tr>
+    <td>@item.EmployeeId</td>
+    <td>@item.Fname</td>
+    <td>@item.Lname</td>
+    <td>@item.Phone_num</td>
+    <td>@item.Dno</td>
+    <td>@item.Super_Eid</td>
+    <td>@item.Email</td>
+    <td>@item.Salary</td>
+    <td>
+    <a class='btn btn-primary btn-sm' href="/Employees/Edit?id=@item.EmployeeId">Edit</a>
+    <a id='deleteAnchor_@item.EmployeeId' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.EmployeeId, true)">Toggle</a>
+    <span id="confirmDeleteAnchor_@item.EmployeeId" style="display:none">
+    <span>Are you sure?</span>
+    <form method="post" asp-page-handler="ToggleStatus" style="display:inline;">
+    <input type="hidden" name="id" value="@item.EmployeeId" />
+    <button type="submit" class="btn btn-danger">Yes</button>
+    </form>
+    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.EmployeeId', false)">No</a>
+    </td>
+    </tr>
+}
+</tbody>
 </table>

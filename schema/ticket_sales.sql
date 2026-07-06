@@ -8,7 +8,8 @@ CREATE TABLE [dbo].[ticket_sales](
 	[Eid] [int] NOT NULL,
 	[Visitor_pn] [bigint] NOT NULL,
 	[R_date] [date] NOT NULL,
-	[R_total] [money] NOT NULL
+	[R_total] [money] NOT NULL,
+  [IsValid] [bit] NOT NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[ticket_sales] ADD PRIMARY KEY CLUSTERED 
@@ -17,6 +18,8 @@ ALTER TABLE [dbo].[ticket_sales] ADD PRIMARY KEY CLUSTERED
 )WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[ticket_sales] ADD  DEFAULT (getdate()) FOR [R_date]
+GO
+ALTER TABLE [dbo].[ticket_sales] ADD  DEFAULT ((1)) FOR [IsValid]
 GO
 ALTER TABLE [dbo].[ticket_sales]  WITH CHECK ADD FOREIGN KEY([Visitor_pn])
 REFERENCES [dbo].[visitor] ([PhoneNumber])

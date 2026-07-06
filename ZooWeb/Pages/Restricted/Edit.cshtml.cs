@@ -4,6 +4,8 @@ using Microsoft.CodeAnalysis;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.Restricted
 {
@@ -17,12 +19,19 @@ namespace ZooWeb.Pages.Restricted
 		public RestrictedInfo info = new RestrictedInfo();
 		public string errorMsg = "";
 		public string successMsg = "";
+
+    private readonly IDbConnectionFactory _factory;
+
+    public EditModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 		public void OnGet()
 		{
 			string locationid = Request.Query["id"];
 
-			string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-			using (SqlConnection connection = new SqlConnection(connectionString))
+			using (SqlConnection connection = _factory.CreateConnection())
 			{
 				connection.Open();
 				String sql = "SELECT * FROM restricted WHERE Location_ID=@locationid";
@@ -72,8 +81,7 @@ namespace ZooWeb.Pages.Restricted
 					throw new Exception("Reopen Date must come after Close Date.");
 				}
 
-				string connectionString = "Server=tcp:zoowebdbserver.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+			  using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "UPDATE restricted " +

@@ -4,22 +4,29 @@ using Microsoft.Data.SqlClient;
 using System.Reflection;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ZooWeb.Data;
 
 
 namespace ZooWeb.Pages.Employees
 {
     public class CreateModel : PageModel
     {
-		public EmployeeInfo info = new EmployeeInfo();
-		public List<ListTable> employeeList = new List<ListTable>();
+        public EmployeeInfo info = new EmployeeInfo();
+        public List<ListTable> employeeList = new List<ListTable>();
         public List<ListTable> departmentList = new List<ListTable>();
         public string errorMsg = "";
-		public string successMsg = "";
+        public string successMsg = "";
+    
+        private readonly IDbConnectionFactory _factory;
+
+        public CreateModel(IDbConnectionFactory factory)
+        {
+          _factory = factory;
+        }
+
         public void OnGet()
         {
-            string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
+				    using (SqlConnection connection = _factory.CreateConnection())
             {
                 connection.Open();
                 String sql = "SELECT EmployeeId, FName, Lname "
@@ -94,9 +101,7 @@ namespace ZooWeb.Pages.Employees
 
 			try
 			{
-				string connectionStringID = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-				using (SqlConnection connection = new SqlConnection(connectionStringID))
+			  using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					String sql = "SELECT TOP 1 * FROM employee ORDER BY EmployeeId DESC;";
@@ -112,8 +117,7 @@ namespace ZooWeb.Pages.Employees
 					}
 				}
 
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+			  using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "INSERT INTO employee (Phone_num, Dno, Super_Eid, Email, Fname, Lname, Salary)" +

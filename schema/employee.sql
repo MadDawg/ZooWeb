@@ -10,13 +10,16 @@ CREATE TABLE [dbo].[employee](
 	[Email] [varchar](50) NOT NULL,
 	[FName] [varchar](30) NOT NULL,
 	[Lname] [varchar](30) NOT NULL,
-	[Salary] [int] NOT NULL
+	[Salary] [int] NOT NULL,
+  [IsEmployed] [bit] NOT NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[employee] ADD PRIMARY KEY CLUSTERED 
 (
 	[EmployeeId] ASC
 )WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[employee] ADD  DEFAULT ((1)) FOR [IsEmployed]
 GO
 SET ANSI_PADDING ON
 GO

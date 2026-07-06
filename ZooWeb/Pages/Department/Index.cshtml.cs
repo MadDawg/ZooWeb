@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Numerics;
+using ZooWeb.Data;
+
 
 
 namespace ZooWeb.Pages.Department
@@ -11,13 +13,18 @@ namespace ZooWeb.Pages.Department
 	public class IndexModel : PageModel
 	{
 		public List<DepartmentInfo> ListDepartment = new List<DepartmentInfo>();
+        
+    private readonly IDbConnectionFactory _factory;
+
+    public IndexModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 
 		public void OnGet()
 		{
-
-			string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-			using (SqlConnection connection = new SqlConnection(connectionString))
+      using (SqlConnection connection = _factory.CreateConnection())
 			{
 				connection.Open();
 				String sql = "SELECT * FROM department";
@@ -37,6 +44,19 @@ namespace ZooWeb.Pages.Department
 				}
 			}
 		}
+    public IActionResult OnPostDelete(int id){
+
+      using var connection = _factory.CreateConnection();
+      connection.Open();
+
+      const string sql = "DELETE restricted WHERE Dnumber=@id";
+
+      using var command = new SqlCommand(sql, connection);
+      command.Parameters.AddWithValue("@id", id);
+      command.ExecuteNonQuery();
+
+      return RedirectToPage();
+    }
 	}
 
 }

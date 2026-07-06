@@ -7,36 +7,39 @@
 <h2>List of Zoo Users</h2>
 <a class='btn btn-primary btn-sm' href="/ZooUsers/Create">New User</a>
 <table class="table">
-	<thead>
-        <tr>
-            <th>User ID</th>
-            <th>Username</th>
-            <th>Account Status</th>
-            <th>Creation Date</th>
-        </tr>
-	</thead>
-	<tbody>
-		@foreach (var item in Model.listZooUsers)
-		{
-            <tr>
-                <td>@item.UserId</td>
-                <td>@item.Username</td>
-                <td>@item.IsActive</td>
-                <td>@item.CreationDate</td>
-                <td>
-                    <a class='btn btn-primary btn-sm' href="/ZooUsers/Edit?id=@item.UserId">Edit</a>
-                    <a id='deleteAnchor_@item.UserId' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.UserId, true)">Toggle</a>
-
-                    <span id="confirmDeleteAnchor_@item.UserId" style="display:none">
-                        <span>Are you sure?</span>
-                        <a href="/ZooUsers/Delete?id=@item.UserId" class="btn btn-danger">Yes</a>
-                        <a href="#" class="btn btn-primary"
-                           onclick="confirmDelete('@item.UserId', false)">No</a>
-                    </span>
-                </td>
-            </tr>
-		}
-	</tbody>
+<thead>
+<tr>
+<th>User ID</th>
+<th>Username</th>
+<th>Account Status</th>
+<th>Creation Date</th>
+</tr>
+</thead>
+  <tbody>
+@foreach (var item in Model.listZooUsers)
+{
+  <tr>
+    <td>@item.UserId</td>
+    <td>@item.Username</td>
+    <td>@item.IsActive</td>
+    <td>@item.CreationDate</td>
+    <td>
+    <a class='btn btn-primary btn-sm' href="/ZooUsers/Edit?id=@item.UserId">Edit</a>
+    
+    <a id='deleteAnchor_@item.UserId' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.UserId, true)">Toggle</a>
+    <span id="confirmDeleteAnchor_@item.UserId" style="display:none">
+    <span>Are you sure?</span>
+    <form method="post" asp-page-handler="ToggleStatus" style="display:inline;">
+    <input type="hidden" name="id" value="@item.UserId" />
+    <button type="submit" class="btn btn-danger">Yes</button>
+    </form>
+    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.UserId', false)">No</a>
+    </span>
+    
+    </td>
+    </tr>
+}
+</tbody>
 </table>
 
 

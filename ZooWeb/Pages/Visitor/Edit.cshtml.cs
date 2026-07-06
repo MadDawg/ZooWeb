@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.Visitor
 {
@@ -10,14 +12,21 @@ namespace ZooWeb.Pages.Visitor
 		public VisitorInfo info = new VisitorInfo();
 		public string errorMsg = "";
 		public string successMsg = "";
+
+    private readonly IDbConnectionFactory _factory;
+
+    public EditModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 		public void OnGet()
 		{
 			String PhoneNumber = Request.Query["id"];
 			// TODO: actually use this (addresses race condition)
 			if (PhoneNumber == null || PhoneNumber == "") { errorMsg = "y tho?"; return; };
 
-			string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-			using (SqlConnection connection = new SqlConnection(connectionString))
+			using (SqlConnection connection = _factory.CreateConnection())
 			{
 				connection.Open();
 				String sql = "SELECT * FROM visitor WHERE PhoneNumber=@PhoneNumber";
@@ -61,8 +70,7 @@ namespace ZooWeb.Pages.Visitor
          
             try
 			{
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+			  using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
                     string sql = "UPDATE visitor " +

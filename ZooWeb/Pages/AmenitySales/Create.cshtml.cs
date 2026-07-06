@@ -4,76 +4,85 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
 using System.Linq;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.AmenitySales
 {
-	public class CreateModel : PageModel
-	{
-		public AmenitytSalesInfo info = new AmenitytSalesInfo();
-		public string errorMsg = "";
-		public string successMsg = "";
-		public void OnGet()
-		{
-		}
+  public class CreateModel : PageModel
+  {
+    public AmenitytSalesInfo info = new AmenitytSalesInfo();
+    public string errorMsg = "";
+    public string successMsg = "";
 
-		public void OnPost()
-		{
+    private readonly IDbConnectionFactory _factory;
 
-			info.EID = Request.Form["EID"];
-			info.LocationID = Request.Form["LocationID"];
-			info.SaleType = Request.Form["SaleType"];
-			//info.SaleDate = Request.Form["SaleDate"];
-			info.SaleTotal = Request.Form["Total"];
-			//info.SaleId = Request.Form["ReceiptNumber"];
+    public CreateModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
 
-			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-			string[] excludedNames = { "SaleDate", "SaleId" };
+    public void OnGet()
+    {
+    }
 
-			foreach (FieldInfo field in fields)
-			{
-				object fieldValue = field.GetValue(info);
-				if (!excludedNames.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
-				{
-					errorMsg = "All fields are required";
-					return;
-				}
-			}
+    public void OnPost()
+    {
 
-			try
-			{
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
-				{
-					connection.Open();
+      info.EID = Request.Form["EID"];
+      info.LocationID = Request.Form["LocationID"];
+      info.SaleType = Request.Form["SaleType"];
+      //info.SaleDate = Request.Form["SaleDate"];
+      info.SaleTotal = Request.Form["Total"];
+      //info.SaleId = Request.Form["ReceiptNumber"];
 
-					string sql = "INSERT INTO amenitySales (Eid, LocationID, SaleType, SaleTotal)" +
-						"	VALUES (@EID, @LocationID, @SaleType, @SaleTotal)";
-					
-					using (SqlCommand command = new SqlCommand(sql, connection))
-					{
-						command.Parameters.AddWithValue("@EID", info.EID);
-						command.Parameters.AddWithValue("@LocationID", info.LocationID);
-						command.Parameters.AddWithValue("@SaleType", info.SaleType);
-						command.Parameters.AddWithValue("@SaleTotal", info.SaleTotal);
+      FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+      string[] excludedNames = { "SaleDate", "SaleId" };
 
-						command.ExecuteNonQuery();
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				errorMsg = ex.Message;
-				return;
-			}
+      foreach (FieldInfo field in fields)
+      {
+        object fieldValue = field.GetValue(info);
+        if (!excludedNames.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
+        {
+          errorMsg = "All fields are required";
+          return;
+        }
+      }
+
+      try
+      {
+        using (SqlConnection connection = _factory.CreateConnection())
+        {
+          connection.Open();
+
+          string sql = "INSERT INTO amenitySales (Eid, LocationID, SaleType, SaleTotal)" +
+            "	VALUES (@EID, @LocationID, @SaleType, @SaleTotal)";
+
+          using (SqlCommand command = new SqlCommand(sql, connection))
+          {
+            command.Parameters.AddWithValue("@EID", info.EID);
+            command.Parameters.AddWithValue("@LocationID", info.LocationID);
+            command.Parameters.AddWithValue("@SaleType", info.SaleType);
+            command.Parameters.AddWithValue("@SaleTotal", info.SaleTotal);
+
+            command.ExecuteNonQuery();
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        errorMsg = ex.Message;
+        return;
+      }
 
 
-			foreach (FieldInfo field in fields)
-			{
-				field.SetValue(info, "");
-			}
-			successMsg = "New Amenity Sale Added";
+      foreach (FieldInfo field in fields)
+      {
+        field.SetValue(info, "");
+      }
+      successMsg = "New Amenity Sale Added";
 
-			Response.Redirect("/AmenitySales/Index");
-		}
-	}
+      Response.Redirect("/AmenitySales/Index");
+    }
+  }
 }

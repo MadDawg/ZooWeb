@@ -31,7 +31,14 @@
 
 				<td>
 					<a class='btn btn-primary btn-sm' href="/TicketSales/Edit?id=@item.TicketID">Edit</a>
-					<a class='btn btn-danger btn-sm' href="/TicketSales/Delete?id=@item.TicketID">Delete</a>
+          <a id='deleteAnchor_@item.TicketID' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.TicketID, true)">Toggle</a>
+
+          <span id="confirmDeleteAnchor_@item.TicketID" style="display:none">
+          <span>Are you sure?</span>
+          <form method="post" asp-page-handler="ToggleStatus" style="display:inline;">
+          <input type="hidden" name="id" value="@item.TicketID" />
+          <button type="submit" class="btn btn-danger">Yes</button>
+          <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.TicketID', false)">No</a>
 				</td>
 			</tr>
 		}

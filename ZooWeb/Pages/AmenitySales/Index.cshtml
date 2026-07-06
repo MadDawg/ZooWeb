@@ -6,29 +6,38 @@
 <h2>List of Amenity Sales</h2>
 <a class='btn btn-primary btn-sm' href="/AmenitySales/Create">New Amenity Sales</a>
 <table class="table">
-    <thead>
-		<tr>
-			<th>Employee Id</th>
-			<th>Location ID</th>
-			<th>Salary Type</th>
-			<th>Sale Date</th>
-			<th>Total</th>
-		</tr>
-    </thead>
-	<tbody>
-		@foreach(var item in Model.ListAmentySales)
-		{
-			<tr>
-				<td>@item.EID</td>
-				<td>@item.LocationID</td>
-				<td>@item.SaleType</td>
-				<td>@item.SaleDate</td>
-				<td>@item.SaleTotal</td>
-				<td>
-					<a class='btn btn-primary btn-sm' href="/AmenitySales/Edit?id=@item.SaleId">Edit</a>
-					<a class='btn btn-danger btn-sm' href="/AmenitySales/Delete?id=@item.SaleId">Delete</a>
-				</td>
-			</tr>
-		}
-	</tbody>
+<thead>
+<tr>
+<th>Employee Id</th>
+<th>Location ID</th>
+<th>Salary Type</th>
+<th>Sale Date</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+@foreach(var item in Model.ListAmentySales)
+{
+  <tr>
+    <td>@item.EID</td>
+    <td>@item.LocationID</td>
+    <td>@item.SaleType</td>
+    <td>@item.SaleDate</td>
+    <td>@item.SaleTotal</td>
+    <td>@item.IsValid</td>
+    <td>
+    <a class='btn btn-primary btn-sm' href="/AmenitySales/Edit?id=@item.SaleId">Edit</a>
+    <a id='deleteAnchor_@item.SaleId' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.SaleId, true)">Toggle</a>
+    <span id="confirmDeleteAnchor_@item.SaleId" style="display:none">
+    <span>Are you sure?</span>
+    <form method="post" asp-page-handler="ToggleStatus" style="display:inline;">
+    <input type="hidden" name="id" value="@item.SaleId" />
+    <button type="submit" class="btn btn-danger">Yes</button>
+    </form>
+    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.SaleId', false)">No</a>
+    </span>
+    </td>
+    </tr>
+}
+</tbody>
 </table>

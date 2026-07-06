@@ -4,6 +4,8 @@ using System.ComponentModel.DataAnnotations;
 using ZooWeb.Pages.Revenue;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.FeedingReport
 {
@@ -11,6 +13,14 @@ namespace ZooWeb.Pages.FeedingReport
 	{
 		public string errorMsg = "";
 		public string successMsg = "";
+    
+    private readonly IDbConnectionFactory _factory;
+
+    public ReportModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 
 		[DataType(DataType.Date)]
 		public DateTime startDate { get; set; }
@@ -31,9 +41,7 @@ namespace ZooWeb.Pages.FeedingReport
 					throw new Exception("Start date cannot exceed end date.");
 				}
 
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-				using (SqlConnection connection = new SqlConnection(connectionString))
+				using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "SELECT animal.Animal_ID, Name, Meal, Portion, Schedule_days, Schedule_time, Status," +

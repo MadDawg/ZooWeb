@@ -4,51 +4,79 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.TicketSales
 {
-	[Authorize(Policy = "admin")]
-	public class IndexModel : PageModel
-	{
-		public List<TicketSaleInfo> ListTicketSales = new List<TicketSaleInfo>();
+  [Authorize(Policy = "admin")]
+  public class IndexModel : PageModel
+  {
+    public List<TicketSaleInfo> ListTicketSales = new List<TicketSaleInfo>();
 
-		public void OnGet()
-		{
-			string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
+    private readonly IDbConnectionFactory _factory;
 
-			using (SqlConnection connection = new SqlConnection(connectionString))
-			{
-				connection.Open();
-				String sql = "SELECT * FROM ticket_sales";
-				using (SqlCommand command = new SqlCommand(sql, connection))
-				{
-					using (SqlDataReader reader = command.ExecuteReader())
-					{
-						while (reader.Read())
-						{
-							TicketSaleInfo info = new TicketSaleInfo();
-							info.TicketID = reader.GetInt32(0).ToString();
-							info.PassType = reader.GetString(1);
-							info.EmployeeID = reader.GetInt32(2).ToString();
-							info.VisitorPn = reader.GetInt64(3).ToString();
-							info.SaleTotal = reader.GetSqlMoney(5).ToString();
-							info.SaleDate = reader.GetDateTime(4).ToString();
+    public IndexModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
 
-							ListTicketSales.Add(info);
-						}
-					}
-				}
-			}
-		}
-	}
 
-	public class TicketSaleInfo
-	{
-		public string TicketID;
-		public string PassType;
-		public string EmployeeID;
-		public string VisitorPn;
-		public string SaleTotal;
-		public string SaleDate;
-	}
+    public void OnGet()
+    {
+      using (SqlConnection connection = _factory.CreateConnection())
+      {
+        connection.Open();
+        String sql = "SELECT * FROM ticket_sales";
+        using (SqlCommand command = new SqlCommand(sql, connection))
+        {
+          using (SqlDataReader reader = command.ExecuteReader())
+          {
+            while (reader.Read())
+            {
+              TicketSaleInfo info = new TicketSaleInfo();
+              info.TicketID = reader.GetInt32(0).ToString();
+              info.PassType = reader.GetString(1);
+              info.EmployeeID = reader.GetInt32(2).ToString();
+              info.VisitorPn = reader.GetInt64(3).ToString();
+              info.SaleTotal = reader.GetSqlMoney(5).ToString();
+              info.SaleDate = reader.GetDateTime(4).ToString();
+              if (reader.GetBoolean(2)) { info.IsValid = "valid"; } else { info.IsValid = "invalid"; }
+
+              ListTicketSales.Add(info);
+            }
+          }
+        }
+      }
+    }
+
+    public IActionResult OnPostToggleStatus(int id){
+      using var connection = _factory.CreateConnection();
+      connection.Open();
+
+      const string sql = """
+        UPDATE ticket_sales
+        SET IsValid = CASE WHEN IsValid = 1 THEN 0 ELSE 1 END
+        WHERE Ticket_Id = @id;
+      """;
+
+      using var command = new SqlCommand(sql, connection);
+      command.Parameters.AddWithValue("@id", id);
+      command.ExecuteNonQuery();
+
+
+      return RedirectToPage();
+    }
+  }
+
+  public class TicketSaleInfo
+  {
+    public string TicketID;
+    public string PassType;
+    public string EmployeeID;
+    public string VisitorPn;
+    public string SaleTotal;
+    public string SaleDate;
+    public string IsValid;
+  }
 }

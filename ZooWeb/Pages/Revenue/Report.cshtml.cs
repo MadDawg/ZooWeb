@@ -5,16 +5,26 @@ using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.Reflection;
 using ZooWeb.Pages.Employees;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.Revenue
 {
     public class ReportModel : PageModel
     {
         public string errorMsg = "";
-		public string successMsg = "";
-		public string source = "";
-		public string eid;
-		public decimal RevenueTotal = 0;
+        public string successMsg = "";
+        public string source = "";
+        public string eid;
+        public decimal RevenueTotal = 0;
+        
+        private readonly IDbConnectionFactory _factory;
+
+        public IndexModel(IDbConnectionFactory factory)
+        {
+          _factory = factory;
+        }
+
 
 		[DataType(DataType.Date)]
 		public DateTime startDate { get; set; }
@@ -38,9 +48,7 @@ namespace ZooWeb.Pages.Revenue
 					throw new Exception("Start date cannot exceed end date.");
 				}
 
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-				using (SqlConnection connection = new SqlConnection(connectionString))
+        using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "SELECT * FROM Revenue WHERE RevenueDate >= @StartDate AND RevenueDate <= @EndDate";
@@ -54,8 +62,7 @@ namespace ZooWeb.Pages.Revenue
 						sql = sql + " AND ReceiptSource=@Src";
 					}
 
-
-					using (SqlCommand command = new SqlCommand(sql, connection))
+          using (SqlConnection connection = _factory.CreateConnection())
 					{
 						command.Parameters.AddWithValue("@StartDate", startDate);
 						command.Parameters.AddWithValue("@EndDate", endDate);

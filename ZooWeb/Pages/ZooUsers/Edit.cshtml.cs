@@ -5,6 +5,8 @@ using System.Reflection;
 using Isopoh.Cryptography.Argon2;
 using System.Data.SqlTypes;
 using System.Linq;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.ZooUsers
 {
@@ -12,16 +14,23 @@ namespace ZooWeb.Pages.ZooUsers
 	{
         public List<RoleListTable> userRoleList = new List<RoleListTable>();
         public ZooUserInfo info = new ZooUserInfo();
-		public string errorMsg = "";
-		public string successMsg = "";
+        public string errorMsg = "";
+        public string successMsg = "";
+
+        private readonly IDbConnectionFactory _factory;
+
+        public EditModel(IDbConnectionFactory factory)
+        {
+          _factory = factory;
+        }
+
 		public void OnGet()
 		{
 			String UserId = Request.Query["id"];
 			// TODO: actually use this (addresses race condition)
 			if (UserId == null || UserId == "") { errorMsg = "y tho?"; return; };
 
-			string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-			using (SqlConnection connection = new SqlConnection(connectionString))
+			using (SqlConnection connection = _factory.CreateConnection())
 			{
 				connection.Open();
 				String sql = "SELECT * FROM zoo_user " +
@@ -100,8 +109,7 @@ namespace ZooWeb.Pages.ZooUsers
 
 			try
 			{
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+		  	using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "UPDATE zoo_user " +
