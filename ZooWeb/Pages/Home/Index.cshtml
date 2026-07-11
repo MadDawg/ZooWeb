@@ -7,28 +7,35 @@
 <h1 justify-content>Welcome to ZooWeb</h1>
 @if (User.IsInRole("admin") || User.IsInRole("zookeeper"))
 {
-	<br></br>
-	<h2>Notifications (@Model.count)</h2>
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Title</th>
-				<th>Message</th>
-				<th>Timestamp</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var item in Model.notifications)
-			{
-				<tr>
-					<td>@item.title</td>
-					<td>@item.message</td>
-					<td>@item.timestamp</td>
-					<td>
-						<a class='btn btn-danger btn-sm' href="/Home/Delete?id=@item.messageId">Delete</a>
-					</td>
-				</tr>
-			}
-		</tbody>
-	</table>
+  <br></br>
+    <h2>Notifications (@Model.count)</h2>
+    <table class="table">
+    <thead>
+    <tr>
+    <th>Title</th>
+    <th>Message</th>
+    <th>Timestamp</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.notifications)
+    {
+      <tr>
+        <td>@item.title</td>
+        <td>@item.message</td>
+        <td>@item.timestamp</td>
+        <td>
+        <a id='deleteAnchor_@item.messageId' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.messageId, true)">Delete</a>
+        <span id="confirmDeleteAnchor_@item.messageId" style="display:none">
+        <span>Are you sure?</span>
+        <form method="post" asp-page-handler="Delete" style="display:inline;">
+        <input type="hidden" name="id" value="@item.messageId" />
+        <button type="submit" class="btn btn-danger">Yes</button>
+        </form>
+        <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.messageId', false)">No</a>
+        </td>
+        </tr>
+    }
+  </tbody>
+    </table>
 }

@@ -67,7 +67,7 @@
         <label class="col-sm-3 col-form-label">Status</label>
         <div class="col-sm-6">
             <select id="src" name="Status" class="form-control" value="@Model.info.Status">
-                @foreach (string item in new List<string> { "Healthy", "Sick", "Dead", "Transferred" })
+                @foreach (string item in new List<string> { "Healthy", "Sick", "Deceased", "Transferred" })
                 {
                     if (item == Model.info.Status)
                     {

@@ -4,7 +4,7 @@
 }
 
 <br>
-<h2>Specify Animal ID for Feeding Report</h2>
+<h2>Select Animal for Feeding Report</h2>
 <br>
 
 @if (Model.errorMsg.Length > 0)
@@ -17,9 +17,14 @@
 
 <form method="POST">
 	<div class="row mb-3">
-		<label class="col-sm-3 col-form-label">Enter Animal ID</label>
+		<label class="col-sm-3 col-form-label">Select Animal</label>
 		<div class="col-sm-6">
-			<input type="number" class="form-control" id="aid" name="aid" value="" pattern="\d*" title="Please enter a Animal ID">
+			<select name="aid" class="form-control">
+				@foreach (AnimalListTable item in Model.animalList)
+				{
+					<option value="@(item.Key)">@item.Display</option>
+				}
+			</select>
 		</div>
 	</div>
 

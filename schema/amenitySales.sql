@@ -8,7 +8,8 @@ CREATE TABLE [dbo].[amenitySales](
 	[SaleType] [varchar](255) NULL,
 	[SaleDate] [datetime] NULL,
 	[SaleTotal] [money] NULL,
-	[SaleId] [bigint] IDENTITY(1,1) NOT NULL
+	[SaleId] [bigint] IDENTITY(1,1) NOT NULL,
+  [IsValid] [bit] NOT NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[amenitySales] ADD PRIMARY KEY CLUSTERED 
@@ -22,6 +23,8 @@ ALTER TABLE [dbo].[amenitySales] ADD UNIQUE NONCLUSTERED
 )WITH (STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[amenitySales] ADD  DEFAULT (getdate()) FOR [SaleDate]
+GO
+ALTER TABLE [dbo].[amenitySales] ADD  DEFAULT ((1)) FOR [IsValid]
 GO
 ALTER TABLE [dbo].[amenitySales]  WITH CHECK ADD FOREIGN KEY([Eid])
 REFERENCES [dbo].[employee] ([EmployeeId])

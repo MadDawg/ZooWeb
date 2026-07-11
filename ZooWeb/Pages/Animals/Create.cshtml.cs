@@ -4,6 +4,8 @@ using Microsoft.Data.SqlClient;
 using System.Reflection;
 using ZooWeb.Pages.ZooUsers;
 using System.Linq;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.Animals
 {
@@ -13,11 +15,17 @@ namespace ZooWeb.Pages.Animals
 		public List<EnclosureListTable> enclosureList = new List<EnclosureListTable>();
 		public string errorMsg = "";
 		public string successMsg = "";
+    
+    private readonly IDbConnectionFactory _factory;
+
+    public CreateModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 		public void OnGet()
 		{
-			string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-			using (SqlConnection connection = new SqlConnection(connectionString))
+			using (SqlConnection connection = _factory.CreateConnection())
 			{
 				connection.Open();
 				String sql = "SELECT LocationID, Type "
@@ -41,8 +49,7 @@ namespace ZooWeb.Pages.Animals
 
 		public void OnPost()
 		{
-			//must add check for null later
-			info.Animal_Id = Request.Form["Animal_Id"];
+			// info.Animal_Id = Request.Form["Animal_Id"];
 			info.Name = Request.Form["Name"];
 			info.Scientific_name = Request.Form["Scientific_name"];
 			info.Common_name = Request.Form["Common_name"];
@@ -52,14 +59,14 @@ namespace ZooWeb.Pages.Animals
 			info.Location_Id = Request.Form["Location_Id"];
 
 			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-			string[] excludedFields = { "Animal_Id" };
+			string[] excludedFields = { "Animal_Id", "IsDeleted" };
 
 			foreach (FieldInfo field in fields)
 			{
 				object fieldValue = field.GetValue(info);
 				if (!excludedFields.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
 				{
-					errorMsg = "All fields are required";
+          errorMsg = "Missing field: " + field.Name;
 					return;
 				}
 			}
@@ -71,8 +78,7 @@ namespace ZooWeb.Pages.Animals
 
 			try
 			{
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+				using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "INSERT INTO Animal (Name, Scientific_name, Common_name, Sex, Birth_date, Status, Location_ID) " +

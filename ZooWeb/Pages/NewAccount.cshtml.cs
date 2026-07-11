@@ -4,14 +4,24 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Reflection;
 using ZooWeb.Pages.ZooUsers;
 using Microsoft.Data.SqlClient;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages
 {
 	public class NewAccountModel : PageModel
 	{
-		public ZooUserInfo info = new ZooUserInfo();
+		public ZooProfileInfo info = new ZooProfileInfo();
 		public string errorMsg = "";
 		public string successMsg = "";
+        
+    private readonly IDbConnectionFactory _factory;
+
+    public NewAccountModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 		public void OnGet()
 		{
 		}
@@ -50,8 +60,7 @@ namespace ZooWeb.Pages
 
 			try
 			{
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+        using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 
@@ -102,7 +111,7 @@ namespace ZooWeb.Pages
 		}
 	}
 
-	public class ZooUserInfo
+	public class ZooProfileInfo
 	{
 		public string UserId;
 		public string Username;

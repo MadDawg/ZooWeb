@@ -7,36 +7,38 @@
 <h2>List of Enclosures</h2>
 <a class='btn btn-primary btn-sm' href="/Enclosures/Create">New Enclosure</a>
 <table class="table">
-	<thead>
-		<tr>
-			<th>Location ID</th>
-			<th>Biome Type</th>
-			<th>Capacity</th>
-			<th>Number of Animals</th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var item in Model.listEnclosures)
-		{
-			<tr>
-				<td>@item.LocationID</td>
-				<td>@item.Type</td>
-				<td>@item.Capacity</td>
-				<td>@item.Occupant_Num</td>
-				<td>
-					<a class='btn btn-primary btn-sm' href="/Enclosures/Edit?id=@item.LocationID">Edit</a>
-					<a id='deleteAnchor_@item.LocationID' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.LocationID, true)">Delete</a>
+<thead>
+<tr>
+<th>Location ID</th>
+<th>Biome Type</th>
+<th>Capacity</th>
+<th>Number of Animals</th>
+</tr>
+</thead>
+  <tbody>
+@foreach (var item in Model.listEnclosures)
+{
+  <tr>
+    <td>@item.LocationID</td>
+    <td>@item.Type</td>
+    <td>@item.Capacity</td>
+    <td>@item.Occupant_Num</td>
+    <td>
+    <a class='btn btn-primary btn-sm' href="/Enclosures/Edit?id=@item.LocationID">Edit</a>
+    <a id='deleteAnchor_@item.LocationID' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.LocationID, true)">Delete</a>
 
-					<span id="confirmDeleteAnchor_@item.LocationID" style="display:none">
-						<span>Are you sure you want to delete?</span>
-						<a href="/Enclosures/Delete?id=@item.LocationID" class="btn btn-danger">Yes</a>
-						<a href="#" class="btn btn-primary"
-						   onclick="confirmDelete('@item.LocationID', false)">No</a>
-					</span>
-				</td>
-			</tr>
-		}
-	</tbody>
+    <span id="confirmDeleteAnchor_@item.LocationID" style="display:none">
+    <span>Are you sure?</span>
+    <form method="post" asp-page-handler="Delete" style="display:inline;">
+    <input type="hidden" name="id" value="@item.LocationID" />
+    <button type="submit" class="btn btn-danger">Yes</button>
+    </form>
+    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.LocationID', false)">No</a>
+    </span>
+    </td>
+    </tr>
+}
+</tbody>
 </table>
 
 

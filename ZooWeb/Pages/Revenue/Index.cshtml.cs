@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Microsoft.Data.SqlClient;
 using System.Numerics;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.Revenue
 {
@@ -11,14 +13,20 @@ namespace ZooWeb.Pages.Revenue
     public class IndexModel : PageModel
     {
         public List<revenueInfo> listRevenue = new List<revenueInfo>();
+        
+        private readonly IDbConnectionFactory _factory;
+
+        public IndexModel(IDbConnectionFactory factory)
+        {
+          _factory = factory;
+        }
+
         public void OnGet()
         {
 
             //try
             //
-                string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-                using (SqlConnection connection = new SqlConnection(connectionString)) 
+                using (SqlConnection connection = _factory.CreateConnection())
                 { 
                     connection.Open();
                     String sql = "SELECT * FROM Revenue";

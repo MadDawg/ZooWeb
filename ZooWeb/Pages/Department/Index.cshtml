@@ -6,23 +6,32 @@
 <h2>Department</h2>
 <a class='btn btn-primary btn-sm' href="/Department/Create">New Department</a>
 <table class="table">
-	<thead>
-		<tr>
-			<th>Department Number</th>
-			<th>Name</th>
-		</tr>
-	</thead>
-	<tbody>
-		@foreach (var item in Model.ListDepartment)
-		{
-			<tr>
-				<td>@item.Dnumber</td>
-				<td>@item.Name</td>
-				<td>
-					<a class='btn btn-primary btn-sm' href="/Department/Edit?id=@item.Dnumber">Edit</a>
-					<a class='btn btn-danger btn-sm' href="/Department/Delete?id=@item.Dnumber">Delete</a>
-				</td>
-			</tr>
-		}
-	</tbody>
+<thead>
+<tr>
+<th>Department Number</th>
+<th>Name</th>
+</tr>
+</thead>
+  <tbody>
+@foreach (var item in Model.ListDepartment)
+{
+  <tr>
+    <td>@item.Dnumber</td>
+    <td>@item.Name</td>
+    <td>
+    <a class='btn btn-primary btn-sm' href="/Department/Edit?id=@item.Dnumber">Edit</a>
+    <a id='deleteAnchor_@item.Dnumber' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.Dnumber, true)">Delete</a>
+    <span id="confirmDeleteAnchor_@item.Dnumber" style="display:none">
+    <span>Are you sure?</span>
+    <form method="post" asp-page-handler="Delete" style="display:inline;">
+    <input type="hidden" name="id" value="@item.Dnumber" />
+    <button type="submit" class="btn btn-danger">Yes</button>
+    </form>
+    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.Dnumber', false)">No</a>
+    </td>
+    </tr>
+}
+</tbody>
 </table>
+
+<script src="~/js/ConfirmDelete.js"></script>

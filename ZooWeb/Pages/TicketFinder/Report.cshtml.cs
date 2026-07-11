@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using System.Linq;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.TicketFinder
 {
@@ -11,6 +13,14 @@ namespace ZooWeb.Pages.TicketFinder
     {
         public string errorMsg = "";
         public string successMsg = "";
+        
+        private readonly IDbConnectionFactory _factory;
+
+        public ReportModel(IDbConnectionFactory factory)
+        {
+          _factory = factory;
+        }
+
 
         [BindProperty]
         public VisitorInfo Visitor { get; set; }
@@ -32,9 +42,7 @@ namespace ZooWeb.Pages.TicketFinder
                     return;
                 }
 
-                string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-                using (SqlConnection connection = new SqlConnection(connectionString))
+                using (SqlConnection connection = _factory.CreateConnection())
                 {
                     connection.Open();
                     string sql = "SELECT FirstName, LastName, PhoneNumber FROM Visitor";
@@ -56,9 +64,7 @@ namespace ZooWeb.Pages.TicketFinder
                     }
                 }
 
-                string connectionStringForTicketSales = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-                using (SqlConnection connection = new SqlConnection(connectionStringForTicketSales))
+                using (SqlConnection connection = _factory.CreateConnection())
                 {
                     connection.Open();
                     string sql = "SELECT * FROM ticket_sales WHERE Visitor_Pn = @PhoneNumber";

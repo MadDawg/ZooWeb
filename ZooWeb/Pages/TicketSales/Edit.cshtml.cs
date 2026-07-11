@@ -4,24 +4,33 @@ using Microsoft.Data.SqlClient;
 using System.Reflection;
 using System.Linq;
 using ZooWeb.Pages.Employees;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.TicketSales
 {
 	public class EditModel : PageModel
 	{
-		public TicketSaleInfo info = new TicketSaleInfo();
-		public List<ListTable> employeeList = new List<ListTable>();
+        public TicketSaleInfo info = new TicketSaleInfo();
+        public List<ListTable> employeeList = new List<ListTable>();
         public List<ListTable> visitorPnList = new List<ListTable>();
         public string errorMsg = "";
-		public string successMsg = "";
+        public string successMsg = "";
+
+        private readonly IDbConnectionFactory _factory;
+
+        public EditModel(IDbConnectionFactory factory)
+        {
+          _factory = factory;
+        }
+
 		public void OnGet()
 		{
 			String TicketSaleID = Request.Query["id"];
 			// TODO: actually use this (addresses race condition)
 			if (TicketSaleID == null || TicketSaleID == "") { errorMsg = "y tho?"; return; };
 
-			string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-			using (SqlConnection connection = new SqlConnection(connectionString))
+			using (SqlConnection connection = _factory.CreateConnection())
 			{
 				connection.Open();
 				String sql = "SELECT * FROM ticket_sales WHERE Ticket_ID=@TicketId";
@@ -89,7 +98,7 @@ namespace ZooWeb.Pages.TicketSales
 			//info.SaleDate = Request.Form["ReceiptNumber"];
 
 			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-			string[] excludedFields = { "TicketID", "SaleDate" };
+			string[] excludedFields = { "TicketID", "SaleDate", "IsValid" };
 
 			foreach (FieldInfo field in fields)
 			{
@@ -103,8 +112,7 @@ namespace ZooWeb.Pages.TicketSales
 
 			try
 			{
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+			  using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "UPDATE ticket_sales " +

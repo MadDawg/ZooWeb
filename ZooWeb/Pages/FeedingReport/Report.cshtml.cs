@@ -4,19 +4,50 @@ using System.ComponentModel.DataAnnotations;
 using ZooWeb.Pages.Revenue;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.FeedingReport
 {
 	public class ReportModel : PageModel
 	{
+    public List<AnimalListTable> animalList = new List<AnimalListTable>();
 		public string errorMsg = "";
 		public string successMsg = "";
+    
+    private readonly IDbConnectionFactory _factory;
+
+    public ReportModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 
 		[DataType(DataType.Date)]
 		public DateTime startDate { get; set; }
 		public DateTime endDate { get; set; }
 		public void OnGet()
 		{
+			using (SqlConnection connection = _factory.CreateConnection())
+			{
+				connection.Open();
+				String sql = "SELECT Animal_ID, Name, Common_name "
+					+ "FROM animal";
+				using (SqlCommand command = new SqlCommand(sql, connection))
+				{
+					using (SqlDataReader reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							animalList.Add(new AnimalListTable
+							{
+								Key = reader.GetInt32(0).ToString(),
+								Display = reader.GetString(1) + " (" + reader.GetString(2) + ")"
+							});
+						}
+					}
+				}
+			}
 		}
 
 		public List<animalInfo> animalInfo = new List<animalInfo>();
@@ -31,9 +62,7 @@ namespace ZooWeb.Pages.FeedingReport
 					throw new Exception("Start date cannot exceed end date.");
 				}
 
-				string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-				using (SqlConnection connection = new SqlConnection(connectionString))
+				using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "SELECT animal.Animal_ID, Name, Meal, Portion, Schedule_days, Schedule_time, Status," +
@@ -76,6 +105,12 @@ namespace ZooWeb.Pages.FeedingReport
 				}
 			}
 		}
+	}
+	
+  public class AnimalListTable
+	{
+		public string Key { get; set; }
+		public string Display { get; set; }
 	}
 
 	public class animalInfo

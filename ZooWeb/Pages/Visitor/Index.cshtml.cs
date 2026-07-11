@@ -3,18 +3,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Numerics;
+using ZooWeb.Data;
+
 namespace ZooWeb.Pages.Visitor
 {
 	[Authorize(Roles = "admin, zookeeper")]
 	public class IndexModel : PageModel
 	{
 		public List<VisitorInfo> ListVisitors = new List<VisitorInfo>();
+        
+    private readonly IDbConnectionFactory _factory;
+
+    public IndexModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 
 		public void OnGet()
 		{
-			string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-			using (SqlConnection connection = new SqlConnection(connectionString))
+      using (SqlConnection connection = _factory.CreateConnection())
 			{
 				connection.Open();
 				String sql = "SELECT * FROM visitor"; // Adjust the table name to match your database

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
 using ZooWeb.Pages.Animals;
+using ZooWeb.Data;
+
 
 namespace ZooWeb.Pages.FeedingPatterns
 {
@@ -12,11 +14,17 @@ namespace ZooWeb.Pages.FeedingPatterns
 		public List<AnimalListTable> animalList = new List<AnimalListTable>();
 		public string errorMsg = "";
 		public string successMsg = "";
+    
+    private readonly IDbConnectionFactory _factory;
+
+    public CreateModel(IDbConnectionFactory factory)
+    {
+      _factory = factory;
+    }
+
 		public void OnGet()
 		{
-			string connectionString = "Server=tcp:zoowebdb.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-
-			using (SqlConnection connection = new SqlConnection(connectionString))
+			using (SqlConnection connection = _factory.CreateConnection())
 			{
 				connection.Open();
 				String sql = "SELECT Animal_ID, Name, Common_name "
@@ -64,8 +72,7 @@ namespace ZooWeb.Pages.FeedingPatterns
 
             try
 			{
-				string connectionString = "Server=tcp:zoowebdbserver.database.windows.net,1433;Database=ZooWeb_db;User ID=zooadmin;Password=peanuts420!;Trusted_Connection=False;Encrypt=True;";
-				using (SqlConnection connection = new SqlConnection(connectionString))
+				using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
 					string sql = "INSERT INTO Feeding_Pattern VALUES (@AnimalId, @Meal, @Portion, @ScheduleDays, @ScheduleTime)";
