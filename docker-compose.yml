@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ${DOCKERFILE:-Dockerfile}
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on: db
+    environment:
+      ASPNETCORE_ENVIRONMENT: "${ENV_TYPE:-Production}"
+      ConnectionStrings__DefaultConnection: "${CONNECTION_STRING?:CONNECTION_STRING must be set}"
+
+  db:
+    image: mcr.microsoft.com/mssql/server:${MSSQL_TAG:-2025-latest}
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "${ACCEPT_EULA:?ACCEPT_EULA must be set to 'Y' to be accepted}"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD must be set}"
+    ports:
+      - "${DB_PORT:-127.0.0.1:1433}:1433"
+    volumes:
+      - database:/var/opt/mssql
+
+  adminer:
+    image: adminer:${ADMINER_TAG}
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-127.0.0.1:8080}:8080"
+
+volumes:
+  database:
+
