@@ -13,6 +13,7 @@ namespace ZooWeb.Pages.AmenitySales
   public class EditModel : PageModel
   {
     public AmenitytSalesInfo info = new AmenitytSalesInfo();
+    public List<EmployeeListTable> employeeList = new List<EmployeeListTable>();
     public string errorMsg = "";
     public string successMsg = "";
 
@@ -45,9 +46,26 @@ namespace ZooWeb.Pages.AmenitySales
               info.EID = reader.GetInt32(0).ToString();
               info.LocationID = reader.GetInt32(1).ToString();
               info.SaleType = reader.GetString(2);
-              info.SaleDate = reader.GetDateTime(5).ToString("yyyy-MM-dd");
+              info.SaleDate = reader.GetDateTime(3).ToString("yyyy-MM-dd");
               info.SaleTotal = reader.GetDecimal(4).ToString();
-              info.SaleId = reader.GetInt64(3).ToString();
+              info.SaleId = reader.GetInt64(5).ToString();
+            }
+          }
+        }
+        
+        sql = "SELECT EmployeeId, FName, Lname "
+          + "FROM employee";
+        using (SqlCommand command = new SqlCommand(sql, connection))
+        {
+          using (SqlDataReader reader = command.ExecuteReader())
+          {
+            while (reader.Read())
+            {
+              employeeList.Add(new EmployeeListTable
+                  {
+                  Key = reader.GetInt32(0).ToString(),
+                  Display = reader.GetString(2) + ", " + reader.GetString(1)
+                  });
             }
           }
         }
@@ -65,13 +83,13 @@ namespace ZooWeb.Pages.AmenitySales
       info.SaleId = Request.Form["SaleId"];
 
       FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-      string[] excludedNames = { "SaleDate", "SaleId" };
+      string[] excludedNames = { "SaleDate", "SaleId", "IsValid" };
       foreach (FieldInfo field in fields)
       {
         object fieldValue = field.GetValue(info);
         if (!excludedNames.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
         {
-          errorMsg = "All fields are required";
+          errorMsg = "Missing field: " + field.Name;
           return;
         }
       }

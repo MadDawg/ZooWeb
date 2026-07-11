@@ -17,6 +17,7 @@
 <th>Supervisor Id</th>
 <th>Email</th>
 <th>Salary</th>
+<th>Employment Status</th>
 </tr>
 </thead>
   <tbody>
@@ -31,8 +32,10 @@
     <td>@item.Super_Eid</td>
     <td>@item.Email</td>
     <td>@item.Salary</td>
+    <td>@item.IsEmployed</td>
     <td>
     <a class='btn btn-primary btn-sm' href="/Employees/Edit?id=@item.EmployeeId">Edit</a>
+
     <a id='deleteAnchor_@item.EmployeeId' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.EmployeeId, true)">Toggle</a>
     <span id="confirmDeleteAnchor_@item.EmployeeId" style="display:none">
     <span>Are you sure?</span>
@@ -41,8 +44,11 @@
     <button type="submit" class="btn btn-danger">Yes</button>
     </form>
     <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.EmployeeId', false)">No</a>
+    </span>
     </td>
     </tr>
 }
 </tbody>
 </table>
+
+<script src="~/js/ConfirmDelete.js"></script>

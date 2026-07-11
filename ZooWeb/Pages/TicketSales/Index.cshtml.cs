@@ -41,7 +41,7 @@ namespace ZooWeb.Pages.TicketSales
               info.VisitorPn = reader.GetInt64(3).ToString();
               info.SaleTotal = reader.GetSqlMoney(5).ToString();
               info.SaleDate = reader.GetDateTime(4).ToString();
-              if (reader.GetBoolean(2)) { info.IsValid = "valid"; } else { info.IsValid = "invalid"; }
+              if (reader.GetBoolean(6)) { info.IsValid = "valid"; } else { info.IsValid = "invalid"; }
 
               ListTicketSales.Add(info);
             }

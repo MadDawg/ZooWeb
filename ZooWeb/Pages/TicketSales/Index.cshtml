@@ -15,6 +15,7 @@
 			<th>Employee ID</th>
 			<th>Sale Total</th>
 			<th>Sale Date</th>
+      <th>Ticket State</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -27,6 +28,7 @@
 				<td>@item.EmployeeID</td>
 				<td>@item.SaleTotal</td>
 				<td>@item.SaleDate</td>
+        <td>@item.IsValid</td>
 
 
 				<td>
@@ -38,9 +40,12 @@
           <form method="post" asp-page-handler="ToggleStatus" style="display:inline;">
           <input type="hidden" name="id" value="@item.TicketID" />
           <button type="submit" class="btn btn-danger">Yes</button>
+          </form>
           <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.TicketID', false)">No</a>
 				</td>
 			</tr>
 		}
 	</tbody>
 </table>
+
+<script src="~/js/ConfirmDelete.js"></script>

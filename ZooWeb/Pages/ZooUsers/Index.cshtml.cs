@@ -10,6 +10,7 @@ namespace ZooWeb.Pages.ZooUsers
 {
   public class IndexModel : PageModel
   {
+		public string errorMsg = "";
     public List<ZooUserInfo> listZooUsers = new List<ZooUserInfo>();
 
     private readonly IDbConnectionFactory _factory;
@@ -19,12 +20,12 @@ namespace ZooWeb.Pages.ZooUsers
       _factory = factory;
     }
 
-    public void OnGet()
+    private void LoadZooUsers()
     {
       using (SqlConnection connection = _factory.CreateConnection())
       {
         connection.Open();
-        String sql = "SELECT UserID, Username, IsActive, CreationDate " 
+        String sql = "SELECT UserID, Username, IsActive, CreationDate, UserRole " 
           + "FROM zoo_user " +
           "WHERE UserRole <> 'system'";
         using (SqlCommand command = new SqlCommand(sql, connection))
@@ -38,6 +39,7 @@ namespace ZooWeb.Pages.ZooUsers
               info.Username = reader.GetString(1);
               if (reader.GetBoolean(2)) { info.IsActive = "enabled"; } else { info.IsActive = "disabled"; }
               info.CreationDate = reader.GetDateTime(3).ToString();
+              info.UserRole = reader.GetString(4);
 
               listZooUsers.Add(info);
             }
@@ -45,19 +47,31 @@ namespace ZooWeb.Pages.ZooUsers
         }
       }
     }
+
+    public void OnGet(){
+      LoadZooUsers();
+    }
+
     public IActionResult OnPostToggleStatus(int id){
       using var connection = _factory.CreateConnection();
       connection.Open();
 
       const string sql = """
         UPDATE zoo_user
-        SET IsValid = CASE WHEN IsValid = 1 THEN 0 ELSE 1 END
+        SET IsActive = CASE WHEN IsActive = 1 THEN 0 ELSE 1 END
         WHERE UserId = @id;
       """;
 
       using var command = new SqlCommand(sql, connection);
       command.Parameters.AddWithValue("@id", id);
-      command.ExecuteNonQuery();
+      try{
+        command.ExecuteNonQuery();
+      }
+      catch (SqlException ex){
+        errorMsg = "At least one admin user must remain.";
+        LoadZooUsers();
+        return Page();
+      }
 
       return RedirectToPage();
     }
@@ -72,5 +86,4 @@ public class ZooUserInfo
   public string IsActive;
   public string CreationDate;
   public string UserRole;
-}
 }

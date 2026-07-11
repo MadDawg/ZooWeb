@@ -12,6 +12,7 @@ namespace ZooWeb.Pages.AmenitySales
   public class CreateModel : PageModel
   {
     public AmenitytSalesInfo info = new AmenitytSalesInfo();
+    public List<EmployeeListTable> employeeList = new List<EmployeeListTable>();
     public string errorMsg = "";
     public string successMsg = "";
 
@@ -24,6 +25,26 @@ namespace ZooWeb.Pages.AmenitySales
 
     public void OnGet()
     {
+      using (SqlConnection connection = _factory.CreateConnection())
+      {
+        connection.Open();
+        String sql = "SELECT EmployeeId, FName, Lname "
+          + "FROM employee";
+        using (SqlCommand command = new SqlCommand(sql, connection))
+        {
+          using (SqlDataReader reader = command.ExecuteReader())
+          {
+            while (reader.Read())
+            {
+              employeeList.Add(new EmployeeListTable
+                  {
+                  Key = reader.GetInt32(0).ToString(),
+                  Display = reader.GetString(2) + ", " + reader.GetString(1)
+                  });
+            }
+          }
+        }
+      }
     }
 
     public void OnPost()
@@ -37,14 +58,14 @@ namespace ZooWeb.Pages.AmenitySales
       //info.SaleId = Request.Form["ReceiptNumber"];
 
       FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-      string[] excludedNames = { "SaleDate", "SaleId" };
+      string[] excludedNames = { "SaleDate", "SaleId", "IsValid" };
 
       foreach (FieldInfo field in fields)
       {
         object fieldValue = field.GetValue(info);
         if (!excludedNames.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
         {
-          errorMsg = "All fields are required";
+          errorMsg = "Missing field: " + field.Name;
           return;
         }
       }
@@ -84,5 +105,10 @@ namespace ZooWeb.Pages.AmenitySales
 
       Response.Redirect("/AmenitySales/Index");
     }
+  }
+  public class EmployeeListTable
+  {
+    public string Key { get; set; }
+    public string Display { get; set; }
   }
 }

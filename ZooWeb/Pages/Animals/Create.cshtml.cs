@@ -49,8 +49,7 @@ namespace ZooWeb.Pages.Animals
 
 		public void OnPost()
 		{
-			//must add check for null later
-			info.Animal_Id = Request.Form["Animal_Id"];
+			// info.Animal_Id = Request.Form["Animal_Id"];
 			info.Name = Request.Form["Name"];
 			info.Scientific_name = Request.Form["Scientific_name"];
 			info.Common_name = Request.Form["Common_name"];
@@ -60,14 +59,14 @@ namespace ZooWeb.Pages.Animals
 			info.Location_Id = Request.Form["Location_Id"];
 
 			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-			string[] excludedFields = { "Animal_Id" };
+			string[] excludedFields = { "Animal_Id", "IsDeleted" };
 
 			foreach (FieldInfo field in fields)
 			{
 				object fieldValue = field.GetValue(info);
 				if (!excludedFields.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
 				{
-					errorMsg = "All fields are required";
+          errorMsg = "Missing field: " + field.Name;
 					return;
 				}
 			}

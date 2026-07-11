@@ -64,7 +64,7 @@ namespace ZooWeb.Pages.TicketFinder
                     }
                 }
 
-                using (SqlCommand command = new SqlCommand(sql, connection))
+                using (SqlConnection connection = _factory.CreateConnection())
                 {
                     connection.Open();
                     string sql = "SELECT * FROM ticket_sales WHERE Visitor_Pn = @PhoneNumber";

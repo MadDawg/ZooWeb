@@ -26,34 +26,32 @@ namespace ZooWeb.Pages.Enclosures
 
 		public void OnPost()
 		{
-			//must add check for null later
-			info.LocationID = Request.Form["LocationId"];
 			info.Type = Request.Form["Type"];
 			info.Capacity = Request.Form["Capacity"];
 			info.Occupant_Num = Request.Form["OccupantNum"];
 
 			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-
-			foreach (FieldInfo field in fields)
-			{
-				object fieldValue = field.GetValue(info);
-				if (fieldValue == "" || fieldValue == null)
-				{
-					errorMsg = "All fields are required";
-					return;
-				}
-			}
+      string[] excludedFields = { "LocationID" }; // TODO: add OccupantNum whenever we autogenerate it
+      
+      foreach (FieldInfo field in fields)
+      {
+        object fieldValue = field.GetValue(info);
+        if (!excludedFields.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
+        {
+          errorMsg = "Missing field: " + field.Name;
+          return;
+        }
+      }
 
 			try
 			{
 				using (SqlConnection connection = _factory.CreateConnection())
 				{
 					connection.Open();
-					string sql = "INSERT INTO Enclosure VALUES (@LocationId, @Type, @Capacity, @OccupantNum)";
+					string sql = "INSERT INTO Enclosure VALUES (@Type, @Capacity, @OccupantNum)";
 
 					using (SqlCommand command = new SqlCommand(sql, connection))
 					{
-						command.Parameters.AddWithValue("@LocationId", int.Parse(info.LocationID));
 						command.Parameters.AddWithValue("@Type", info.Type);
 						command.Parameters.AddWithValue("@Capacity", info.Capacity);
 						command.Parameters.AddWithValue("@OccupantNum", info.Occupant_Num);

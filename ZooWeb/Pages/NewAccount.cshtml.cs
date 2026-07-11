@@ -11,13 +11,13 @@ namespace ZooWeb.Pages
 {
 	public class NewAccountModel : PageModel
 	{
-		public ZooUserInfo info = new ZooUserInfo();
+		public ZooProfileInfo info = new ZooProfileInfo();
 		public string errorMsg = "";
 		public string successMsg = "";
         
     private readonly IDbConnectionFactory _factory;
 
-    public IndexModel(IDbConnectionFactory factory)
+    public NewAccountModel(IDbConnectionFactory factory)
     {
       _factory = factory;
     }
@@ -111,7 +111,7 @@ namespace ZooWeb.Pages
 		}
 	}
 
-	public class ZooUserInfo
+	public class ZooProfileInfo
 	{
 		public string UserId;
 		public string Username;

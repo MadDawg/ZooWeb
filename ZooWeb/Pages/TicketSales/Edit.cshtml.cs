@@ -98,7 +98,7 @@ namespace ZooWeb.Pages.TicketSales
 			//info.SaleDate = Request.Form["ReceiptNumber"];
 
 			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-			string[] excludedFields = { "TicketID", "SaleDate" };
+			string[] excludedFields = { "TicketID", "SaleDate", "IsValid" };
 
 			foreach (FieldInfo field in fields)
 			{

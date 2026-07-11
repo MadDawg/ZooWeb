@@ -45,6 +45,7 @@ namespace ZooWeb.Pages.Employees
               info.Fname = reader.GetString(5);
               info.Lname = reader.GetString(6);
               info.Salary = reader.GetInt32(7).ToString();
+              info.IsEmployed = reader.GetBoolean(8) ? "employed" : "not employed";
 
               listEmployees.Add(info);
             }
@@ -59,7 +60,7 @@ namespace ZooWeb.Pages.Employees
       const string sql = """
         UPDATE employee
         SET IsEmployed = CASE WHEN IsEmployed = 1 THEN 0 ELSE 1 END
-        WHERE UserId = @id;
+        WHERE EmployeeId = @id;
       """;
 
       using var command = new SqlCommand(sql, connection);
@@ -80,5 +81,6 @@ namespace ZooWeb.Pages.Employees
     public string Fname;
     public string Lname;
     public string Salary;
+    public string IsEmployed;
   }
 }  

@@ -1,8 +1,9 @@
 using Microsoft.Data.SqlClient;
 
-namespace ZooWeb.Data;
+namespace ZooWeb.Data{
 
-public interface IDbConnectionFactory
-{
+  public interface IDbConnectionFactory
+  {
     SqlConnection CreateConnection();
+  }
 }

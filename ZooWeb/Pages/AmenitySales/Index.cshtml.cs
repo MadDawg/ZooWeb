@@ -40,7 +40,7 @@ namespace ZooWeb.Pages.AmenitySales
               info.SaleDate = reader.GetDateTime(3).ToString("yyyy-MM-dd");
               info.SaleTotal = reader.GetSqlMoney(4).ToString();
               info.SaleId = reader.GetInt64(5).ToString();
-              if (reader.GetBoolean(4)) { info.IsValid = "valid sale"; } else { info.IsValid = "invalid sale"; }
+              if (reader.GetBoolean(6)) { info.IsValid = "valid sale"; } else { info.IsValid = "invalid sale"; }
 
               ListAmentySales.Add(info);
             }

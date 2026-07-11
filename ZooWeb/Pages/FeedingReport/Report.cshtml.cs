@@ -11,6 +11,7 @@ namespace ZooWeb.Pages.FeedingReport
 {
 	public class ReportModel : PageModel
 	{
+    public List<AnimalListTable> animalList = new List<AnimalListTable>();
 		public string errorMsg = "";
 		public string successMsg = "";
     
@@ -27,6 +28,26 @@ namespace ZooWeb.Pages.FeedingReport
 		public DateTime endDate { get; set; }
 		public void OnGet()
 		{
+			using (SqlConnection connection = _factory.CreateConnection())
+			{
+				connection.Open();
+				String sql = "SELECT Animal_ID, Name, Common_name "
+					+ "FROM animal";
+				using (SqlCommand command = new SqlCommand(sql, connection))
+				{
+					using (SqlDataReader reader = command.ExecuteReader())
+					{
+						while (reader.Read())
+						{
+							animalList.Add(new AnimalListTable
+							{
+								Key = reader.GetInt32(0).ToString(),
+								Display = reader.GetString(1) + " (" + reader.GetString(2) + ")"
+							});
+						}
+					}
+				}
+			}
 		}
 
 		public List<animalInfo> animalInfo = new List<animalInfo>();
@@ -84,6 +105,12 @@ namespace ZooWeb.Pages.FeedingReport
 				}
 			}
 		}
+	}
+	
+  public class AnimalListTable
+	{
+		public string Key { get; set; }
+		public string Display { get; set; }
 	}
 
 	public class animalInfo

@@ -5,6 +5,13 @@
 
 <br>
 <h2>List of Zoo Users</h2>
+@if (Model.errorMsg.Length > 0)
+{
+	<div class="alert alert-warning alert-dismissible fade show" role="alert">
+		<strong>@Model.errorMsg</strong>
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+}
 <a class='btn btn-primary btn-sm' href="/ZooUsers/Create">New User</a>
 <table class="table">
 <thead>
