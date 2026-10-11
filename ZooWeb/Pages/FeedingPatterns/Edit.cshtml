@@ -18,7 +18,7 @@
 <form method="POST">
     <div class="row mb-3">
         <div class="col-sm-6">
-            <input type="hidden" class="form-control" name="AnimalId" value="@Model.info.Animal_ID">
+            <input type="hidden" class="form-control" name="AnimalId" value="@Model.info.AnimalId">
         </div>
     </div>
     <div class="row mb-3">
@@ -40,7 +40,7 @@
                 @foreach (string day in new List<string>{ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" })
                 {
                     bool feedingDay = false;
-                    @foreach(string scheduledDay in Model.info.Schedule_days)
+                    @foreach(string scheduledDay in Model.info.ScheduleDays)
                     {
                         if (scheduledDay == day)
                         {
@@ -65,7 +65,7 @@
     <div class="row mb-3">
         <label class="col-sm-3 col-form-label">Feeding Time</label>
         <div class="col-sm-6">
-            <input type="time" class="form-control" name="ScheduleTime" value="@Model.info.Schedule_time">
+            <input type="time" class="form-control" name="ScheduleTime" value="@Model.info.ScheduleTime">
         </div>
     </div>
 

@@ -20,7 +20,7 @@
 		<label class="col-sm-3 col-form-label">Select Animal</label>
 		<div class="col-sm-6">
 			<select name="aid" class="form-control">
-				@foreach (AnimalListTable item in Model.animalList)
+				@foreach (var item in Model.animalList)
 				{
 					<option value="@(item.Key)">@item.Display</option>
 				}
@@ -51,7 +51,7 @@
 
 	<br></br>
 
-	@if (Model.animalInfo.Count() > 0)
+	@if (Model.reportInfoList.Count() > 0)
 	{
 		<table class="table">
 			<thead>
@@ -67,17 +67,17 @@
 				</tr>
 			</thead>
 			<tbody>
-				@foreach (var item in Model.animalInfo)
+				@foreach (var item in Model.reportInfoList)
 				{
 					<tr>
 						<td>@item.AnimalId</td>
 						<td>@item.Name</td>
 						<td>@item.Meal</td>
 						<td>@item.Portion</td>
-						<td>@item.Schedule_days</td>
-						<td>@item.Schedule_time</td>
+						<td>@item.ScheduleDays</td>
+						<td>@item.ScheduleTime</td>
 						<td>@item.Status</td>
-						<td>@item.Location</td>
+						<td>@item.LocationId</td>
 					</tr>
 				}
 			</tbody>

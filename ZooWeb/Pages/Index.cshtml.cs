@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Authentication;
 using System.Security.Claims;
 using Isopoh.Cryptography.Argon2;
 using Microsoft.Data.SqlClient;
-using ZooWeb.Pages.ZooUsers;
 using System.Data;
+// using ZooWeb.Pages.ZooUsers;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 
@@ -23,18 +24,18 @@ namespace ZooWeb.Pages
 
     public string Role;
 
-    private readonly IDbConnectionFactory _factory;
+    private readonly ZooUserRepository _repo;
 
-    public LoginModel(IDbConnectionFactory factory)
+    public LoginModel(ZooUserRepository repo)
     {
-      _factory = factory;
+      _repo = repo;
     }
 
 
     public async Task<IActionResult> OnPostAsync()
     {
       // Validate username and password
-      if (IsValidUser(Username, Password))
+      if (await IsValidUser(Username, Password))
       {
         //indicate the user is authenticated.
         var claims = new List<Claim>
@@ -61,48 +62,22 @@ namespace ZooWeb.Pages
       }
     }
 
-    private bool IsValidUser(string username, string password)
+    private async Task<bool> IsValidUser(string username, string password)
     {
-      ZooUserInfo info = new ZooUserInfo();
-      using (SqlConnection connection = _factory.CreateConnection())
+      ZooUserValidatorInfo? info = new ZooUserValidatorInfo();
+      try{
+        info = await _repo.GetByUsernameForValidationAsync(username);
+      }
+      catch
       {
-        connection.Open();
-        String sql = "SELECT UserID, Username, PasswordHash, UserRole, IsActive "
-          + "FROM zoo_user "
-          + "WHERE Username = @Username";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          command.Parameters.AddWithValue("@Username", username);
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            if (reader.Read())
-            {
-              //info.UserId = reader.GetInt32(0).ToString();
-              info.Username = reader.GetString(1);
-              info.PasswordHash = reader.GetString(2);
-              try
-              {
-                Role = reader.GetString(3);
-              }
-              catch (Exception ex)
-              {
-                return false;
-              }
-              if (!reader.GetBoolean(4)) {
-                return false;
-              }
-            }
-          }
-        }
+        return false;
       }
       //validate the user here.
-      // TODO: validate against roles table when it is created
-      if (!String.IsNullOrEmpty(info.Username) && !String.IsNullOrEmpty(info.PasswordHash) && Argon2.Verify(info.PasswordHash, password))
-      {
-        return true;
-      }
-
-      return false;
+      return(
+        info?.UserRole is not null && 
+        !String.IsNullOrEmpty(info.PasswordHash) &&
+        Argon2.Verify(info.PasswordHash, password)
+      );
     }
   }
 }

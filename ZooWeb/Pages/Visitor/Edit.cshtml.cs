@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.Visitor
@@ -12,42 +13,23 @@ namespace ZooWeb.Pages.Visitor
     public VisitorInfo info = new VisitorInfo();
     public string errorMsg = "";
     public string successMsg = "";
+    
+    private readonly VisitorRepository _repo;
 
-    private readonly IDbConnectionFactory _factory;
-
-    public EditModel(IDbConnectionFactory factory)
-    {
-      _factory = factory;
+    public EditModel(VisitorRepository repo){
+      _repo = repo;
     }
 
-    public void OnGet()
+    public async Task<IActionResult> OnGet()
     {
       String PhoneNumber = Request.Query["id"];
       // TODO: actually use this (addresses race condition)
-      if (PhoneNumber == null || PhoneNumber == "") { errorMsg = "y tho?"; return; };
+      if (PhoneNumber == null || PhoneNumber == "") { errorMsg = "y tho?"; return Page(); };
 
-      using (SqlConnection connection = _factory.CreateConnection())
-      {
-        connection.Open();
-        String sql = "SELECT * FROM visitor WHERE PhoneNumber=@PhoneNumber";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          command.Parameters.AddWithValue("@PhoneNumber", PhoneNumber);
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            if (reader.Read())
-            {
-              info.PhoneNumber = reader.GetInt64(0).ToString();
-              info.FirstName = reader.GetString(1);
-              info.LastName = reader.GetString(2);
-              info.BirthDate = reader.GetDateTime(3).ToString();
-
-            }
-          }
-        }
-      }
+      info = await _repo.GetByIdAsync(long.Parse(PhoneNumber));
+      return Page();
     }
-    public void OnPost()
+    public async Task<IActionResult> OnPost()
     {
       //must add check for null later
       info.PhoneNumber = Request.Query["id"];
@@ -64,34 +46,18 @@ namespace ZooWeb.Pages.Visitor
         if ((fieldValue == "" || fieldValue == null))
         {
           errorMsg = "All fields are required";
-          return;
+          return Page();
         }
       }
 
       try
       {
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-          string sql = "UPDATE visitor " +
-            "SET FirstName=@FirstName, LastName=@LastName, BirthDate=@BirthDate " +
-            "WHERE PhoneNumber=@PhoneNumber";
-
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            command.Parameters.AddWithValue("@PhoneNumber", info.PhoneNumber);
-            command.Parameters.AddWithValue("@FirstName", info.FirstName);
-            command.Parameters.AddWithValue("@LastName", info.LastName);
-            command.Parameters.AddWithValue("@BirthDate", info.BirthDate);
-
-            command.ExecuteNonQuery();
-          }
-        }
+        await _repo.UpdateAsync(info);
       }
       catch (Exception ex)
       {
         errorMsg = ex.Message;
-        return;
+        return Page();
       }
 
       foreach (FieldInfo field in fields)
@@ -100,7 +66,7 @@ namespace ZooWeb.Pages.Visitor
       }
       successMsg = "Visitor updated";
 
-      Response.Redirect("/Visitor/Index");
+      return RedirectToPage("/Visitor/Index");
     }
   }
 }

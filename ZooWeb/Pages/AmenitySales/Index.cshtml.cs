@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Numerics;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.AmenitySales
@@ -11,69 +12,22 @@ namespace ZooWeb.Pages.AmenitySales
   [Authorize(Policy = "admin")]
   public class IndexModel : PageModel
   {
-    public List<AmenitytSalesInfo> ListAmentySales = new List<AmenitytSalesInfo>();
+    public List<AmenitySaleInfo> amenitySales = new List<AmenitySaleInfo>();
+    
+    private readonly AmenitySaleRepository _amenitySaleRepo;
 
-    private readonly IDbConnectionFactory _factory;
-
-    public IndexModel(IDbConnectionFactory factory)
-    {
-      _factory = factory;
+    public IndexModel(AmenitySaleRepository amenitySaleRepo){
+      _amenitySaleRepo = amenitySaleRepo;
     }
 
-    public void OnGet()
+    public async Task<IActionResult> OnGet()
     {
-      using (SqlConnection connection = _factory.CreateConnection())
-      {
-        connection.Open();
-        String sql = "SELECT * " +
-          "FROM amenitySales";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              AmenitytSalesInfo info = new AmenitytSalesInfo();
-              info.EID = reader.GetInt32(0).ToString();
-              info.LocationID = reader.GetInt32(1).ToString();
-              info.SaleType = reader.GetString(2);
-              info.SaleDate = reader.GetDateTime(3).ToString("yyyy-MM-dd");
-              info.SaleTotal = reader.GetSqlMoney(4).ToString();
-              info.SaleId = reader.GetInt64(5).ToString();
-              if (reader.GetBoolean(6)) { info.IsValid = "valid sale"; } else { info.IsValid = "invalid sale"; }
-
-              ListAmentySales.Add(info);
-            }
-          }
-        }
-      }
+      amenitySales = await _amenitySaleRepo.GetAllAsync();
+      return Page();
     }
-    public IActionResult OnPostToggleStatus(int id){
-      using var connection = _factory.CreateConnection();
-      connection.Open();
-
-      const string sql = """
-        UPDATE amenitySales
-        SET IsValid = CASE WHEN IsValid = 1 THEN 0 ELSE 1 END
-        WHERE SaleId = @id;
-      """;
-
-      using var command = new SqlCommand(sql, connection);
-      command.Parameters.AddWithValue("@id", id);
-      command.ExecuteNonQuery();
-
+    public async Task<IActionResult> OnPostToggleStatus(int id){
+      await _amenitySaleRepo.ToggleAsync(id);
       return RedirectToPage();
     }
   }
-
-}
-public class AmenitytSalesInfo
-{
-  public string EID;
-  public string LocationID;
-  public string SaleType;
-  public string SaleDate;
-  public string SaleTotal;
-  public string SaleId;
-  public string IsValid;
 }

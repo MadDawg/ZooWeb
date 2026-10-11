@@ -59,7 +59,7 @@
 
     <br></br>
 
-    @if (Model.listVisitors.Count() > 0)
+    @if (Model.listVisitors.Any())
     {
         <table class="table">
             <thead>
@@ -72,13 +72,13 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.ListTicketSales)
+                @foreach (var item in Model.listVisitors)
                 {
                     <tr>
-                        <td>@item.ReceiptNumber</td>
-                        <td>@item.Date</td>
-                        <td>@item.Total</td>
-                        <td>@item.TicketID</td>
+                        <td>BROKEN! Cannot get receipt number!</td>
+                        <td>@item.SaleDate</td>
+                        <td>@item.SaleTotal</td>
+                        <td>@item.TicketId</td>
                         <td>@item.PassType</td>
                     </tr>
                 }

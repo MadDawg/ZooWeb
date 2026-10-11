@@ -15,22 +15,22 @@
 </tr>
 </thead>
   <tbody>
-@foreach(var item in Model.Restrictions)
+@foreach(var item in Model.restrictions)
 {
   <tr>
-    <td>@item.Location_ID</td>
-    <td>@item.Close_date</td>
-    <td>@item.Reopen_date</td>
+    <td>@item.LocationId</td>
+    <td>@item.CloseDate</td>
+    <td>@item.ReopenDate</td>
     <td>
-    <a class='btn btn-primary btn-sm' href="/Restricted/Edit?id=@item.Location_ID">Edit</a>
-    <a id='deleteAnchor_@item.Location_ID' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.Location_ID, true)">Delete</a>
-    <span id="confirmDeleteAnchor_@item.Location_ID" style="display:none">
+    <a class='btn btn-primary btn-sm' href="/Restricted/Edit?id=@item.LocationId">Edit</a>
+    <a id='deleteAnchor_@item.LocationId' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.LocationId, true)">Delete</a>
+    <span id="confirmDeleteAnchor_@item.LocationId" style="display:none">
     <span>Are you sure?</span>
     <form method="post" asp-page-handler="Delete" style="display:inline;">
-    <input type="hidden" name="id" value="@item.Location_ID" />
+    <input type="hidden" name="id" value="@item.LocationId" />
     <button type="submit" class="btn btn-danger">Yes</button>
     </form>
-    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.Location_ID', false)">No</a>
+    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.LocationId', false)">No</a>
     </span>
     </td>
     </tr>

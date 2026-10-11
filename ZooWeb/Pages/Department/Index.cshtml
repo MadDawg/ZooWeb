@@ -16,18 +16,18 @@
 @foreach (var item in Model.ListDepartment)
 {
   <tr>
-    <td>@item.Dnumber</td>
+    <td>@item.DepartmentNumber</td>
     <td>@item.Name</td>
     <td>
-    <a class='btn btn-primary btn-sm' href="/Department/Edit?id=@item.Dnumber">Edit</a>
-    <a id='deleteAnchor_@item.Dnumber' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.Dnumber, true)">Delete</a>
-    <span id="confirmDeleteAnchor_@item.Dnumber" style="display:none">
+    <a class='btn btn-primary btn-sm' href="/Department/Edit?id=@item.DepartmentNumber">Edit</a>
+    <a id='deleteAnchor_@item.DepartmentNumber' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.DepartmentNumber, true)">Delete</a>
+    <span id="confirmDeleteAnchor_@item.DepartmentNumber" style="display:none">
     <span>Are you sure?</span>
     <form method="post" asp-page-handler="Delete" style="display:inline;">
-    <input type="hidden" name="id" value="@item.Dnumber" />
+    <input type="hidden" name="id" value="@item.DepartmentNumber" />
     <button type="submit" class="btn btn-danger">Yes</button>
     </form>
-    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.Dnumber', false)">No</a>
+    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.DepartmentNumber', false)">No</a>
     </td>
     </tr>
 }

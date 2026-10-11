@@ -19,29 +19,29 @@
 		</tr>
 	</thead>
 	<tbody>
-		@foreach (var item in Model.ListTicketSales)
+		@foreach (var item in Model.listTicketSales)
 		{
 			<tr>
-				<td>@item.TicketID</td>
+				<td>@item.TicketId</td>
 				<td>@item.PassType</td>
-				<td>@item.VisitorPn</td>
-				<td>@item.EmployeeID</td>
+				<td>@item.VisitorPhoneNumber</td>
+				<td>@item.EmployeeId</td>
 				<td>@item.SaleTotal</td>
 				<td>@item.SaleDate</td>
         <td>@item.IsValid</td>
 
 
 				<td>
-					<a class='btn btn-primary btn-sm' href="/TicketSales/Edit?id=@item.TicketID">Edit</a>
-          <a id='deleteAnchor_@item.TicketID' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.TicketID, true)">Toggle</a>
+					<a class='btn btn-primary btn-sm' href="/TicketSales/Edit?id=@item.TicketId">Edit</a>
+          <a id='deleteAnchor_@item.TicketId' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.TicketId, true)">Toggle</a>
 
-          <span id="confirmDeleteAnchor_@item.TicketID" style="display:none">
+          <span id="confirmDeleteAnchor_@item.TicketId" style="display:none">
           <span>Are you sure?</span>
           <form method="post" asp-page-handler="ToggleStatus" style="display:inline;">
-          <input type="hidden" name="id" value="@item.TicketID" />
+          <input type="hidden" name="id" value="@item.TicketId" />
           <button type="submit" class="btn btn-danger">Yes</button>
           </form>
-          <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.TicketID', false)">No</a>
+          <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.TicketId', false)">No</a>
 				</td>
 			</tr>
 		}

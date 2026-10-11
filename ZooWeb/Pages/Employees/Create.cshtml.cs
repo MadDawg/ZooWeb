@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.Employees
@@ -17,74 +18,42 @@ namespace ZooWeb.Pages.Employees
     public string errorMsg = "";
     public string successMsg = "";
 
-    private readonly IDbConnectionFactory _factory;
+    private readonly EmployeeRepository _employeeRepo;
+    private readonly DepartmentRepository _departmentRepo;
 
-    public CreateModel(IDbConnectionFactory factory)
+    public CreateModel(EmployeeRepository employeeRepo, DepartmentRepository departmentRepo)
     {
-      _factory = factory;
+      _employeeRepo = employeeRepo;
+      _departmentRepo = departmentRepo;
     }
 
-    public void OnGet()
+    public async Task<IActionResult> OnGet()
     {
-      using (SqlConnection connection = _factory.CreateConnection())
-      {
-        connection.Open();
-        String sql = "SELECT EmployeeId, FName, Lname "
-          + "FROM employee";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              employeeList.Add(new ListTable
-                  {
-                  Key = reader.GetInt32(0).ToString(),
-                  Display = reader.GetString(2) + ", " + reader.GetString(1)
-                  });
-            }
-          }
-        }
-
-        sql = "SELECT * "
-          + "FROM department";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              departmentList.Add(new ListTable
-                  {
-                  Key = reader.GetInt16(0).ToString(),
-                  Display = reader.GetString(1)
-                  });
-            }
-          }
-        }
-      }
+      employeeList = await _employeeRepo.GetAllMinimalAsync();
+      departmentList = await _departmentRepo.GetAllAsListTableAsync();
+      return Page();
     }
 
-    public void OnPost() 
+    public async Task<IActionResult> OnPost() 
     {
       //must add check for null later
 
       //info.EmployeeId = "0";
-      info.Phone_num = Request.Form["Phone_num"];
+      info.PhoneNumber = Request.Form["Phone_num"];
 
       Regex rx = new Regex(@"^\d{10}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-      if (!rx.IsMatch(info.Phone_num))
+      if (!rx.IsMatch(info.PhoneNumber))
       {
         errorMsg = "Phone number must be all numbers with no spaces";
-        return;
+        return Page();
       }
 
-      info.Dno = Request.Form["Dno"];
-      info.Super_Eid = Request.Form["Super_Eid"];
+      info.DepartmentNumber = Request.Form["Dno"];
+      info.SupervisorEmployeeId = Request.Form["Super_Eid"];
       info.Email = Request.Form["Email"];
-      info.Fname = Request.Form["Fname"];
-      info.Lname = Request.Form["Lname"];
+      info.FirstName = Request.Form["Fname"];
+      info.LastName = Request.Form["Lname"];
       info.Salary = Request.Form["Salary"];
 
       FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
@@ -95,52 +64,18 @@ namespace ZooWeb.Pages.Employees
         if (!excludedFields.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
         {
           errorMsg = "Missing required field: " + field.Name;
-          return;
+          return Page();
         }
       }
 
       try
       {
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-          String sql = "SELECT TOP 1 * FROM employee ORDER BY EmployeeId DESC;";
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            using (SqlDataReader reader = command.ExecuteReader())
-            {
-              while (reader.Read())
-              {
-                info.EmployeeId = (reader.GetInt32(0) + 1).ToString();
-              }
-            }
-          }
-        }
-
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-          string sql = "INSERT INTO employee (Phone_num, Dno, Super_Eid, Email, Fname, Lname, Salary)" +
-            "VALUES (@Phone_num, @Dno, @Super_Eid, @Email, @Fname, @Lname, @Salary)";
-
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            command.Parameters.AddWithValue("@Phone_num", info.Phone_num);
-            command.Parameters.AddWithValue("@Dno", info.Dno);
-            command.Parameters.AddWithValue("@Super_Eid", info.Super_Eid);
-            command.Parameters.AddWithValue("@Email", info.Email);
-            command.Parameters.AddWithValue("@Fname", info.Fname);
-            command.Parameters.AddWithValue("@Lname", info.Lname);
-            command.Parameters.AddWithValue("@Salary", info.Salary);
-
-            command.ExecuteNonQuery();
-          }
-        }
+        await _employeeRepo.AddAsync(info);
       }
       catch (Exception ex)
       {
         errorMsg = ex.Message;
-        return;
+        return Page();
       }
 
       foreach (FieldInfo field in fields)
@@ -149,12 +84,7 @@ namespace ZooWeb.Pages.Employees
       }
       successMsg = "New Employee Added";
 
-      Response.Redirect("/Employees/Index");
+      return RedirectToPage("/Employees/Index");
     }
-  }
-  public class ListTable
-  {
-    public string Key { get; set; }
-    public string Display { get; set; }
   }
 }

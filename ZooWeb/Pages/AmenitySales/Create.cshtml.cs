@@ -5,110 +5,73 @@ using Microsoft.Data.SqlClient;
 using System.Reflection;
 using System.Linq;
 using ZooWeb.Data;
-
+using ZooWeb.Data.Entities;
 
 namespace ZooWeb.Pages.AmenitySales
 {
   public class CreateModel : PageModel
   {
-    public AmenitytSalesInfo info = new AmenitytSalesInfo();
-    public List<EmployeeListTable> employeeList = new List<EmployeeListTable>();
+    public AmenitySaleInfo info = new AmenitySaleInfo();
+    public List<ListTable> employeeList = new List<ListTable>();
+
     public string errorMsg = "";
     public string successMsg = "";
 
-    private readonly IDbConnectionFactory _factory;
+    private readonly AmenitySaleRepository _amenitySaleRepo;
+    private readonly EmployeeRepository _employeeRepo;
 
-    public CreateModel(IDbConnectionFactory factory)
-    {
-      _factory = factory;
+    public CreateModel(AmenitySaleRepository amenitySaleRepo, EmployeeRepository employeeRepo){
+      _amenitySaleRepo = amenitySaleRepo;
+      _employeeRepo = employeeRepo;
     }
 
-    public void OnGet()
+    public async Task<IActionResult> OnGet()
     {
-      using (SqlConnection connection = _factory.CreateConnection())
-      {
-        connection.Open();
-        String sql = "SELECT EmployeeId, FName, Lname "
-          + "FROM employee";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              employeeList.Add(new EmployeeListTable
-                  {
-                  Key = reader.GetInt32(0).ToString(),
-                  Display = reader.GetString(2) + ", " + reader.GetString(1)
-                  });
-            }
-          }
-        }
-      }
+      employeeList = await _employeeRepo.GetAllMinimalAsync();
+      return Page();
     }
 
-    public void OnPost()
+    public async Task<IActionResult> OnPost()
     {
+      AmenitySaleInfo formInfo = new AmenitySaleInfo();
+      formInfo.EmployeeId = Request.Form["EID"];
+      formInfo.LocationId = Request.Form["LocationID"];
+      formInfo.SaleType = Request.Form["SaleType"];
+      //formInfo.SaleDate = Request.Form["SaleDate"];
+      formInfo.SaleTotal = Request.Form["Total"];
+      //formInfo.SaleId = Request.Form["ReceiptNumber"];
 
-      info.EID = Request.Form["EID"];
-      info.LocationID = Request.Form["LocationID"];
-      info.SaleType = Request.Form["SaleType"];
-      //info.SaleDate = Request.Form["SaleDate"];
-      info.SaleTotal = Request.Form["Total"];
-      //info.SaleId = Request.Form["ReceiptNumber"];
-
-      FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+      FieldInfo[] fields = formInfo.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
       string[] excludedNames = { "SaleDate", "SaleId", "IsValid" };
 
       foreach (FieldInfo field in fields)
       {
-        object fieldValue = field.GetValue(info);
+        object fieldValue = field.GetValue(formInfo);
         if (!excludedNames.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
         {
           errorMsg = "Missing field: " + field.Name;
-          return;
+          return Page();
         }
       }
 
       try
       {
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-
-          string sql = "INSERT INTO amenitySales (Eid, LocationID, SaleType, SaleTotal)" +
-            "	VALUES (@EID, @LocationID, @SaleType, @SaleTotal)";
-
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            command.Parameters.AddWithValue("@EID", info.EID);
-            command.Parameters.AddWithValue("@LocationID", info.LocationID);
-            command.Parameters.AddWithValue("@SaleType", info.SaleType);
-            command.Parameters.AddWithValue("@SaleTotal", info.SaleTotal);
-
-            command.ExecuteNonQuery();
-          }
-        }
+        await _amenitySaleRepo.AddAsync(formInfo);
       }
       catch (Exception ex)
       {
         errorMsg = ex.Message;
-        return;
+        return Page();
       }
 
 
       foreach (FieldInfo field in fields)
       {
-        field.SetValue(info, "");
+        field.SetValue(formInfo, "");
       }
       successMsg = "New Amenity Sale Added";
 
-      Response.Redirect("/AmenitySales/Index");
+      return RedirectToPage("/AmenitySales/Index");
     }
-  }
-  public class EmployeeListTable
-  {
-    public string Key { get; set; }
-    public string Display { get; set; }
   }
 }

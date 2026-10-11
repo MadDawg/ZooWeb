@@ -57,11 +57,11 @@
 }
 <br></br>
 
-@if (Model.TicketSaleInfo.Count() > 0)
+@if (Model.listTicketSale.Any())
 {
     <div class="row mb-3">
         <div class="col-sm-9">
-            <p>Total Number of Tickets: @Model.TotalTickets</p>
+            <p>Total Number of Tickets: @Model.listTicketSale.Count</p>
         </div>
     </div>
 
@@ -77,13 +77,13 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model.TicketSaleInfo)
+            @foreach (var item in Model.listTicketSale)
             {
                 <tr>
-                    <td>@item.TicketID</td>
+                    <td>@item.TicketId</td>
                     <td>@item.PassType</td>
-                    <td>@item.VisitorPn</td>
-                    <td>@item.EmployeeID</td>
+                    <td>@item.VisitorPhoneNumber</td>
+                    <td>@item.EmployeeId</td>
                     <td>@item.SaleTotal</td>
                     <td>@item.SaleDate</td>
                 </tr>

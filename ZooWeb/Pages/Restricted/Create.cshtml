@@ -19,9 +19,9 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Location</label>
 		<div class="col-sm-6">
-			<select class="form-control" name="Location_ID" value="@Model.info.Location_ID">
+			<select class="form-control" name="Location_ID" value="@Model.info.LocationId">
 				<option value="">-</option>
-				@foreach (EnclosureListTable item in Model.enclosureList)
+				@foreach (var item in Model.enclosureList)
 				{
 					<option value="@(item.Key)">@item.Display</option>
 				}
@@ -31,13 +31,13 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Close Date</label>
 		<div class="col-sm-6">
-			<input type="datetime-local" class="form-control" name="Close_date" value="@Model.info.Close_date">
+			<input type="datetime-local" class="form-control" name="Close_date" value="@Model.info.CloseDate">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Reopen Date</label>
 		<div class="col-sm-6">
-			<input type="datetime-local" class="form-control" name="Reopen_date" value="@Model.info.Reopen_date">
+			<input type="datetime-local" class="form-control" name="Reopen_date" value="@Model.info.ReopenDate">
 		</div>
 	</div>
 

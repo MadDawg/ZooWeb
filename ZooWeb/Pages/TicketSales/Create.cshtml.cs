@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using ZooWeb.Pages.Employees;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.TicketSales
@@ -17,61 +18,30 @@ namespace ZooWeb.Pages.TicketSales
     public string errorMsg = "";
     public string successMsg = "";
 
-    private readonly IDbConnectionFactory _factory;
+    private readonly TicketSaleRepository _ticketSaleRepo;
+    private readonly EmployeeRepository _employeeRepo;
+    private readonly VisitorRepository _visitorRepo;
 
-    public CreateModel(IDbConnectionFactory factory)
-    {
-      _factory = factory;
+    public CreateModel(TicketSaleRepository ticketSaleRepo, EmployeeRepository employeeRepo, VisitorRepository visitorRepo){
+      _ticketSaleRepo = ticketSaleRepo;
+      _employeeRepo = employeeRepo;
+      _visitorRepo = visitorRepo;
     }
 
-    public void OnGet()
+    public async Task<IActionResult> OnGet()
     {
-      using (SqlConnection connection = _factory.CreateConnection())
-      {
-        connection.Open();
-        String sql = "SELECT EmployeeId, FName, Lname "
-          + "FROM employee";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              employeeList.Add(new ListTable
-                  {
-                  Key = reader.GetInt32(0).ToString(),
-                  Display = reader.GetString(2) + ", " + reader.GetString(1)
-                  });
-            }
-          }
-        }
-
-        sql = "SELECT PhoneNumber "
-          + "FROM visitor";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              visitorPnList.Add(new ListTable
-                  {
-                  Key = reader.GetInt64(0).ToString(),
-                  Display = reader.GetInt64(0).ToString()
-                  });
-            }
-          }
-        }
-      }
+      employeeList = await _employeeRepo.GetAllMinimalAsync();
+      visitorPnList = await _visitorRepo.GetAllPhoneNumbersAsync();
+      return Page();
     }
 
-    public void OnPost() 
+    public async Task<IActionResult> OnPost() 
     {
       //must add check for null later
       //info.TicketID = Request.Form["TicketID"];
       info.PassType = Request.Form["PassType"];
-      info.EmployeeID = Request.Form["EmployeeID"];
-      info.VisitorPn = Request.Form["VisitorPn"];
+      info.EmployeeId = Request.Form["EmployeeID"];
+      info.VisitorPhoneNumber = Request.Form["VisitorPn"];
       info.SaleTotal = Request.Form["Total"];
       //info.SaleDate = "placeholder";
       //Decimal total = decimal.Parse(Request.Form["Total"]);
@@ -86,33 +56,18 @@ namespace ZooWeb.Pages.TicketSales
         if (!excludedFields.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
         {
           errorMsg = "Missing required field: " + field.Name;
-          return;
+          return Page();
         }
       }
 
       try
       {
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-          string sql = "INSERT INTO ticket_sales (Pass_type, Eid, Visitor_pn, R_total) " +
-            "VALUES (@PassType, @Eid, @VisitorPn, @SaleTotal)";
-
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            command.Parameters.AddWithValue("@PassType", info.PassType);
-            command.Parameters.AddWithValue("@Eid", info.EmployeeID);
-            command.Parameters.AddWithValue("@VisitorPn", info.VisitorPn);
-            command.Parameters.AddWithValue("@SaleTotal", info.SaleTotal);
-
-            command.ExecuteNonQuery();
-          }
-        }
+        await _ticketSaleRepo.AddAsync(info);
       }
       catch (Exception ex)
       {
         errorMsg = ex.Message;
-        return;
+        return Page();
       }
 
       foreach (FieldInfo field in fields)
@@ -121,12 +76,7 @@ namespace ZooWeb.Pages.TicketSales
       }
       successMsg = "New Ticket Added";
 
-      Response.Redirect("/TicketSales/Index");
+      return RedirectToPage("/TicketSales/Index");
     }
-  }
-  public class ListTable
-  {
-    public string Key { get; set; }
-    public string Display { get; set; }
   }
 }

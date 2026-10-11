@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.TicketSales
@@ -12,71 +13,23 @@ namespace ZooWeb.Pages.TicketSales
   [Authorize(Policy = "admin")]
   public class IndexModel : PageModel
   {
-    public List<TicketSaleInfo> ListTicketSales = new List<TicketSaleInfo>();
+    public List<TicketSaleInfo> listTicketSales = new List<TicketSaleInfo>();
 
-    private readonly IDbConnectionFactory _factory;
+    private readonly TicketSaleRepository _repo;
 
-    public IndexModel(IDbConnectionFactory factory)
-    {
-      _factory = factory;
+    public IndexModel(TicketSaleRepository repo){
+      _repo = repo;
     }
 
-
-    public void OnGet()
+    public async Task<IActionResult> OnGet()
     {
-      using (SqlConnection connection = _factory.CreateConnection())
-      {
-        connection.Open();
-        String sql = "SELECT * FROM ticket_sales";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              TicketSaleInfo info = new TicketSaleInfo();
-              info.TicketID = reader.GetInt32(0).ToString();
-              info.PassType = reader.GetString(1);
-              info.EmployeeID = reader.GetInt32(2).ToString();
-              info.VisitorPn = reader.GetInt64(3).ToString();
-              info.SaleTotal = reader.GetSqlMoney(5).ToString();
-              info.SaleDate = reader.GetDateTime(4).ToString();
-              if (reader.GetBoolean(6)) { info.IsValid = "valid"; } else { info.IsValid = "invalid"; }
-
-              ListTicketSales.Add(info);
-            }
-          }
-        }
-      }
+      listTicketSales = await _repo.GetAllAsync();
+      return Page();
     }
 
-    public IActionResult OnPostToggleStatus(int id){
-      using var connection = _factory.CreateConnection();
-      connection.Open();
-
-      const string sql = """
-        UPDATE ticket_sales
-        SET IsValid = CASE WHEN IsValid = 1 THEN 0 ELSE 1 END
-        WHERE Ticket_Id = @id;
-      """;
-
-      using var command = new SqlCommand(sql, connection);
-      command.Parameters.AddWithValue("@id", id);
-      command.ExecuteNonQuery();
-
-
+    public async Task<IActionResult> OnPostToggleStatus(int id){
+      await _repo.ToggleAsync(id);
       return RedirectToPage();
     }
-  }
-
-  public class TicketSaleInfo
-  {
-    public string TicketID;
-    public string PassType;
-    public string EmployeeID;
-    public string VisitorPn;
-    public string SaleTotal;
-    public string SaleDate;
-    public string IsValid;
   }
 }

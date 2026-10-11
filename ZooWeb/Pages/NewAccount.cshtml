@@ -31,13 +31,13 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">First Name</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Fname" value="@Model.info.Fname">
+			<input type="text" class="form-control" name="Fname" value="@Model.info.FirstName">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Last Name</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Lname" value="@Model.info.Lname">
+			<input type="text" class="form-control" name="Lname" value="@Model.info.LastName">
 		</div>
 	</div>
 	<div class="row mb-3">
@@ -49,7 +49,7 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Birthday</label>
 		<div class="col-sm-6">
-			<input type="date" class="form-control" name="Bday" value="@Model.info.Bday">
+			<input type="date" class="form-control" name="Bday" value="@Model.info.BirthDate">
 		</div>
 	</div>
 	@if (Model.successMsg.Length > 0)

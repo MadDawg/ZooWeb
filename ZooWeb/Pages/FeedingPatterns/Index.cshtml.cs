@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using System.Numerics;
 using System.Diagnostics;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.FeedingPatterns
@@ -14,60 +15,22 @@ namespace ZooWeb.Pages.FeedingPatterns
   {
     public List<FeedingPatternInfo> listFeedingPatterns = new List<FeedingPatternInfo>();
 
-    private readonly IDbConnectionFactory _factory;
+    private readonly FeedingPatternRepository _repo;
 
-    public IndexModel(IDbConnectionFactory factory)
+    public IndexModel(FeedingPatternRepository repo)
     {
-      _factory = factory;
+      _repo = repo;
     }
 
-    public void OnGet()
+    public async Task <IActionResult> OnGet()
     {
-      using (SqlConnection connection = _factory.CreateConnection())
-      {
-        connection.Open();
-        String sql = "SELECT * FROM feeding_pattern";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              FeedingPatternInfo info = new FeedingPatternInfo();
-              info.Animal_ID = reader.GetInt32(0).ToString();
-              info.Meal = reader.GetString(1);
-              info.Portion = reader.GetDecimal(2).ToString();
-              info.Schedule_days = reader.GetString(3).Split(',').ToList();
-              info.Schedule_time = reader.GetTimeSpan(4);
-
-              listFeedingPatterns.Add(info);
-            }
-          }
-        }
-      }
+      listFeedingPatterns = await _repo.GetAllAsync();
+      return Page();
     }
-    
-    public IActionResult OnPostDelete(int id){
 
-      using var connection = _factory.CreateConnection();
-      connection.Open();
-
-      const string sql = "DELETE restricted WHERE Animal_ID=@id";
-
-      using var command = new SqlCommand(sql, connection);
-      command.Parameters.AddWithValue("@id", id);
-      command.ExecuteNonQuery();
-
+    public async Task<IActionResult> OnPostDelete(int id){
+      await _repo.DeleteByIdAsync(id);
       return RedirectToPage();
     }
-  }
-
-  public class FeedingPatternInfo
-  {
-    public string Animal_ID;
-    public string Meal;
-    public string Portion;
-    public List<string> Schedule_days;
-    public TimeSpan Schedule_time;
   }
 }

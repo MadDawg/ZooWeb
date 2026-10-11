@@ -8,7 +8,7 @@
 @if (User.IsInRole("admin") || User.IsInRole("zookeeper"))
 {
   <br></br>
-    <h2>Notifications (@Model.count)</h2>
+    <h2>Notifications (@Model.notifications.Count)</h2>
     <table class="table">
     <thead>
     <tr>
@@ -39,3 +39,4 @@
   </tbody>
     </table>
 }
+<script src="~/js/ConfirmDelete.js"></script>

@@ -19,8 +19,8 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Animal ID</label>
 		<div class="col-sm-6">
-			<select class="form-control" name="AnimalId" value="@Model.info.Animal_ID">
-				@foreach (AnimalListTable item in Model.animalList)
+			<select class="form-control" name="AnimalId" value="@Model.info.AnimalId">
+				@foreach (var item in Model.animalList)
 				{
 					<option value="@(item.Key)">@item.Display</option>
 				}
@@ -56,7 +56,7 @@
 	<div class="row mb-3">
         <label class="col-sm-3 col-form-label">Feeding Time</label>
 		<div class="col-sm-6">
-			<input type="time" class="form-control" name="ScheduleTime" value="@Model.info.Schedule_time">
+			<input type="time" class="form-control" name="ScheduleTime" value="@Model.info.ScheduleTime">
 		</div>
 	</div>
 
