@@ -38,7 +38,7 @@
         <div class="col-sm-6">
             <select name="Role" class="form-control" value="@Model.info.UserRole">
                 <option value="">-</option>
-                @foreach (RoleListTable item in Model.userRoleList)
+                @foreach (var item in Model.userRoleList)
                 {
                     if (item.Key == Model.info.UserRole)
                     {

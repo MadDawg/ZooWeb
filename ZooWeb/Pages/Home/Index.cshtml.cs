@@ -4,95 +4,38 @@ using System.Security.Claims;
 using Microsoft.Data.SqlClient;
 using ZooWeb.Pages.Employees;
 using ZooWeb.Data;
-
+using ZooWeb.Data.Entities;
 
 namespace ZooWeb.Pages.Home
 {
   public class PrivacyModel : PageModel
   {
     private readonly ILogger<PrivacyModel> _logger;
-    private readonly IDbConnectionFactory _factory;
+    private readonly ZooUserRepository _zooUserRepo;
+    private readonly NotificationRepository _notificationRepo;
 
-    public PrivacyModel(ILogger<PrivacyModel> logger, IDbConnectionFactory factory)
+    public PrivacyModel(ILogger<PrivacyModel> logger, ZooUserRepository zooUserRepo, NotificationRepository notificationRepo)
     {
       _logger = logger;
-      _factory = factory;
+      _zooUserRepo = zooUserRepo;
+      _notificationRepo = notificationRepo;
     }
 
-    public List<notification> notifications = new List<notification>();
-    public int count = 0;
-    public void OnGet()
+    public List<NotificationInfo> notifications = new List<NotificationInfo>();
+    public async Task<IActionResult> OnGet()
     {
       string username = User?.FindFirstValue(ClaimTypes.Name);
-      int userid = 0;
 
       if (!string.IsNullOrEmpty(username))
       {
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-          string sql = "SELECT UserId FROM zoo_user WHERE Username=@username";
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            command.Parameters.AddWithValue("@username", username);
-
-            using (SqlDataReader reader = command.ExecuteReader())
-            {
-              while (reader.Read())
-              {
-                userid = reader.GetInt32(0);
-              }
-            }
-          }
-        }
-
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-          string sql = "SELECT MessageId, Title, Message, Timestamp FROM notification WHERE Recipient=@userid";
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            command.Parameters.AddWithValue("@userid", userid);
-
-            using (SqlDataReader reader = command.ExecuteReader())
-            {
-              while (reader.Read())
-              {
-                notification info = new notification();
-                info.messageId = reader.GetInt32(0);
-                info.title = reader.GetString(1);
-                info.message = reader.GetString(2);
-                info.timestamp = reader.GetDateTime(3);
-                count++;
-
-                notifications.Add(info);
-              }
-            }
-          }
-        }
+        int? userid = await _zooUserRepo.GetIdByUsernameAsync(username);
+        if (userid is not null){ notifications = await _notificationRepo.GetByUserIdAsync((int)userid); }
       }
+      return Page();
     }
-    public IActionResult OnPostDelete(int id){
-
-      using var connection = _factory.CreateConnection();
-      connection.Open();
-
-      const string sql = "DELETE restricted WHERE MessageId=@id";
-
-      using var command = new SqlCommand(sql, connection);
-      command.Parameters.AddWithValue("@id", id);
-      command.ExecuteNonQuery();
-
+    public async Task<IActionResult> OnPostDelete(int id){
+      await _notificationRepo.DeleteByIdAsync(id);
       return RedirectToPage();
     }
-  }
-
-  public class notification
-  {
-    public int messageId { get; set; }
-    public string title { get; set; }
-    public string message { get; set; }
-    public DateTime timestamp { get; set; }
-
   }
 }

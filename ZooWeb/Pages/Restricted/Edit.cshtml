@@ -16,22 +16,22 @@
 }
 
 <form method="POST">
-	<input type="hidden" name="id" value="@Model.info.Location_ID">
+	<input type="hidden" name="id" value="@Model.info.LocationId">
 	<div class="row mb-3">
 		<div class="col-sm-6">
-			<input type="hidden" class="form-control" name="Location_ID" value="@Model.info.Location_ID">
+			<input type="hidden" class="form-control" name="Location_ID" value="@Model.info.LocationId">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Close Date</label>
 		<div class="col-sm-6">
-			<input type="datetime-local" class="form-control" name="Close_date" value="@Model.info.Close_date.ToString("yyyy-MM-ddTHH:mm")">
+			<input type="datetime-local" class="form-control" name="Close_date" value="@Model.info.CloseDate.ToString("yyyy-MM-ddTHH:mm")">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Reopen Date</label>
 		<div class="col-sm-6">
-			<input type="datetime-local" class="form-control" name="Reopen_date" value="@Model.info.Reopen_date.ToString("yyyy-MM-ddTHH:mm")">
+			<input type="datetime-local" class="form-control" name="Reopen_date" value="@Model.info.ReopenDate.ToString("yyyy-MM-ddTHH:mm")">
 		</div>
 	</div>
 

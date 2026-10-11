@@ -4,6 +4,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[employee](
 	[EmployeeId] [int] IDENTITY(1,1) NOT NULL,
+  [UserId] [int] NULL,
 	[Phone_num] [varchar](10) NOT NULL,
 	[Dno] [smallint] NULL,
 	[Super_Eid] [int] NULL,
@@ -32,4 +33,7 @@ ALTER TABLE [dbo].[employee] ADD UNIQUE NONCLUSTERED
 GO
 ALTER TABLE [dbo].[employee]  WITH CHECK ADD FOREIGN KEY([Dno])
 REFERENCES [dbo].[department] ([Dnumber])
+GO
+ALTER TABLE [dbo].[visitor]  WITH CHECK ADD FOREIGN KEY([UserId])
+REFERENCES [dbo].[zoo_user] ([UserId])
 GO

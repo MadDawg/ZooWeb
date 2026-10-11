@@ -16,10 +16,10 @@
 }
 
 <form method="POST">
-    <input type="hidden" name="id" value="@Model.info.TicketID">
+    <input type="hidden" name="id" value="@Model.info.TicketId">
     <div class="row mb-3">
         <div class="col-sm-6">
-            <input type="hidden" class="form-control" name="TicketId" value="@Model.info.TicketID">
+            <input type="hidden" class="form-control" name="TicketId" value="@Model.info.TicketId">
         </div>
     </div>
     <div class="row mb-3">
@@ -43,11 +43,11 @@
     <div class="row mb-3">
         <label class="col-sm-3 col-form-label">Employee ID</label>
         <div class="col-sm-6">
-            <select class="form-control" name="EmployeeID" value="@Model.info.EmployeeID">
+            <select class="form-control" name="EmployeeID" value="@Model.info.EmployeeId">
                 <option value="">-</option>
-                @foreach (ListTable item in Model.employeeList)
+                @foreach (var item in Model.employeeList)
                 {
-                    if (item.Key == Model.info.EmployeeID)
+                    if (item.Key == Model.info.EmployeeId)
                     {
                         <option value="@(item.Key)" selected="selected">@item.Display</option>
                     }
@@ -62,11 +62,11 @@
     <div class="row mb-3">
         <label class="col-sm-3 col-form-label">Visitor Pn</label>
         <div class="col-sm-6">
-            <select class="form-control" name="VisitorPn" value="@Model.info.VisitorPn">
+            <select class="form-control" name="VisitorPn" value="@Model.info.VisitorPhoneNumber">
                 <option value="">-</option>
-                @foreach (ListTable item in Model.visitorPnList)
+                @foreach (var item in Model.visitorPnList)
                 {
-                    if (item.Key == Model.info.VisitorPn)
+                    if (item.Key == Model.info.VisitorPhoneNumber)
                     {
                         <option value="@(item.Key)" selected="selected">@item.Display</option>
                     }

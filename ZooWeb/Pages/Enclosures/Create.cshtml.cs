@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
 using ZooWeb.Data;
-
+using ZooWeb.Data.Entities;
 
 namespace ZooWeb.Pages.Enclosures
 {
@@ -13,22 +13,23 @@ namespace ZooWeb.Pages.Enclosures
 		public string errorMsg = "";
 		public string successMsg = "";
         
-    private readonly IDbConnectionFactory _factory;
+    private readonly EnclosureRepository _repo;
 
-    public CreateModel(IDbConnectionFactory factory)
+    public CreateModel(EnclosureRepository repo)
     {
-      _factory = factory;
+      _repo = repo;
     }
 
-		public void OnGet()
+		public async Task<IActionResult> OnGet()
 		{
+      return Page();
 		}
 
-		public void OnPost()
+		public async Task<IActionResult> OnPost()
 		{
 			info.Type = Request.Form["Type"];
 			info.Capacity = Request.Form["Capacity"];
-			info.Occupant_Num = Request.Form["OccupantNum"];
+			info.OccupantNumber = Request.Form["OccupantNum"];
 
 			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
       string[] excludedFields = { "LocationID" }; // TODO: add OccupantNum whenever we autogenerate it
@@ -39,31 +40,18 @@ namespace ZooWeb.Pages.Enclosures
         if (!excludedFields.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
         {
           errorMsg = "Missing field: " + field.Name;
-          return;
+          return Page();
         }
       }
 
 			try
 			{
-				using (SqlConnection connection = _factory.CreateConnection())
-				{
-					connection.Open();
-					string sql = "INSERT INTO Enclosure VALUES (@Type, @Capacity, @OccupantNum)";
-
-					using (SqlCommand command = new SqlCommand(sql, connection))
-					{
-						command.Parameters.AddWithValue("@Type", info.Type);
-						command.Parameters.AddWithValue("@Capacity", info.Capacity);
-						command.Parameters.AddWithValue("@OccupantNum", info.Occupant_Num);
-
-						command.ExecuteNonQuery();
-					}
-				}
+        await _repo.AddAsync(info);
 			}
 			catch (Exception ex)
 			{
 				errorMsg = ex.Message;
-				return;
+				return Page();
 			}
 
 			foreach (FieldInfo field in fields)
@@ -72,7 +60,7 @@ namespace ZooWeb.Pages.Enclosures
 			}
 			successMsg = "New Enclosure Added";
 
-			Response.Redirect("/Enclosures/Index");
+			return RedirectToPage("/Enclosures/Index");
 		}
 	}
 }

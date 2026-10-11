@@ -24,29 +24,29 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">First Name</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Fname" value="@Model.info.Fname">
+			<input type="text" class="form-control" name="Fname" value="@Model.info.FirstName">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Last Name</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Lname" value="@Model.info.Lname">
+			<input type="text" class="form-control" name="Lname" value="@Model.info.LastName">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Phone Number</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Phone_num" value="@Model.info.Phone_num">
+			<input type="text" class="form-control" name="Phone_num" value="@Model.info.PhoneNumber">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Department</label>
 		<div class="col-sm-6">
-			<select class="form-control" name="Dno" value="@Model.info.Dno">
+			<select class="form-control" name="Dno" value="@Model.info.DepartmentNumber">
 				<option value="">-</option>
-				@foreach (ListTable item in Model.departmentList)
+				@foreach (var item in Model.departmentList)
 				{
-					if (item.Key == Model.info.Dno)
+					if (item.Key == Model.info.DepartmentNumber)
 					{
 						<option value="@(item.Key)" selected="selected">@item.Display</option>
 					}
@@ -61,11 +61,11 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Supervisor</label>
 		<div class="col-sm-6">
-			<select class="form-control" name="Super_Eid" value="@Model.info.Super_Eid">
+			<select class="form-control" name="Super_Eid" value="@Model.info.SupervisorEmployeeId">
 				<option value="">-</option>
-				@foreach (ListTable item in Model.employeeList)
+				@foreach (var item in Model.employeeList)
 				{
-					if (item.Key == Model.info.Super_Eid)
+					if (item.Key == Model.info.SupervisorEmployeeId)
 					{
 						<option value="@(item.Key)" selected="selected">@item.Display</option>
 					}

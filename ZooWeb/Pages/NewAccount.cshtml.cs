@@ -5,122 +5,71 @@ using System.Reflection;
 using ZooWeb.Pages.ZooUsers;
 using Microsoft.Data.SqlClient;
 using ZooWeb.Data;
-
+using ZooWeb.Data.Entities;
 
 namespace ZooWeb.Pages
 {
-	public class NewAccountModel : PageModel
-	{
-		public ZooProfileInfo info = new ZooProfileInfo();
-		public string errorMsg = "";
-		public string successMsg = "";
-        
-    private readonly IDbConnectionFactory _factory;
+  public class NewAccountModel : PageModel
+  {
+    public ZooProfileInfo info = new ZooProfileInfo();
+    public string errorMsg = "";
+    public string successMsg = "";
 
-    public NewAccountModel(IDbConnectionFactory factory)
-    {
-      _factory = factory;
+    private readonly ZooProfileRepository _repo;
+    
+    public NewAccountModel(ZooProfileRepository repo){
+      _repo = repo;
     }
 
-		public void OnGet()
-		{
-		}
+    public async Task<IActionResult> OnGet()
+    {
+      return Page();
+    }
 
-		public void OnPost()
-		{
-			info.Username = Request.Form["Username"];
-			info.PasswordHash = Argon2.Hash(Request.Form["Password"]);
-			info.Fname = Request.Form["Fname"];
-			info.Lname = Request.Form["Lname"];
-			info.PhoneNumber = Request.Form["Pn"];
-			info.Bday = DateTime.Parse(Request.Form["Bday"]);
-			//info.IsActive = Request.Form["Status"];
+    public async Task<IActionResult> OnPost()
+    {
+      info.Username = Request.Form["Username"];
+      info.PasswordHash = Argon2.Hash(Request.Form["Password"]);
+      info.FirstName = Request.Form["Fname"];
+      info.LastName = Request.Form["Lname"];
+      info.PhoneNumber = Request.Form["Pn"];
+      info.BirthDate = DateTime.Parse(Request.Form["Bday"]);
+      //info.IsActive = Request.Form["Status"];
 
-			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+      FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+      string[] excludedNames = {"UserId", "CreationDate", "IsActive"};
 
-			foreach (FieldInfo field in fields)
-			{
-				object fieldValue = field.GetValue(info);
-				/*String acct_status = Request.Form["Status"];
-				if (acct_status != "disabled" && acct_status != "enabled")
-				{
-					errorMsg = "Account Status must be \"enabled\" or \"disabled\", not whatever \"" + acct_status + "\" is...";
-					return;
-				}*/
-				// we should have to check for status but it doesn't seem to work otherwise
-				if (field.Name != "UserId"
-					&& field.Name != "CreationDate"
-					&& field.Name != "IsActive"
-					&& (fieldValue == "" || fieldValue == null))
-				{
-					errorMsg = "All fields are required";
-					return;
-				}
-			}
+      foreach (FieldInfo field in fields)
+      {
+        object fieldValue = field.GetValue(info);
+        if (!excludedNames.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
+        {
+          errorMsg = "Missing field: " + field.Name;
+          return Page();
+        }
+      }
 
-			try
-			{
-        using (SqlConnection connection = _factory.CreateConnection())
-				{
-					connection.Open();
+      try
+      {
+        await _repo.AddAsync(info);
+      }
 
-					string userSql = "INSERT INTO zoo_user (Username, PasswordHash, IsActive, CreationDate, UserRole) " +
-									 "VALUES (@Username, @Password, @Status, @CreationDate, 'visitor');";
+      catch (Exception ex)
+      {
+        errorMsg = ex.Message;
+        return Page();
+      }
 
-					using (SqlCommand userCommand = new SqlCommand(userSql, connection))
-					{
-						userCommand.Parameters.AddWithValue("@Username", info.Username);
-						userCommand.Parameters.AddWithValue("@Password", info.PasswordHash);
-						userCommand.Parameters.AddWithValue("@Status", true);
-						userCommand.Parameters.AddWithValue("@CreationDate", DateTime.Now);
+      foreach (FieldInfo field in fields)
+      {
+        if (field.FieldType == typeof(string)) {field.SetValue(info, "");}
+        else { field.SetValue(info, null); }
 
-						userCommand.ExecuteNonQuery();
-					}
+      }
+      successMsg = "New User Added";
 
-					string visitorSql = "INSERT INTO visitor (PhoneNumber, FirstName, LastName, BirthDate) " +
-										"VALUES (@PhoneNumber, @FirstName, @LastName, @Bday);";
+      return RedirectToPage("/Index");
 
-					using (SqlCommand visitorCommand = new SqlCommand(visitorSql, connection))
-					{
-						visitorCommand.Parameters.AddWithValue("@Phonenumber", info.PhoneNumber);
-						visitorCommand.Parameters.AddWithValue("@FirstName", info.Fname);
-						visitorCommand.Parameters.AddWithValue("@LastName", info.Lname);
-						visitorCommand.Parameters.AddWithValue("@Bday", info.Bday);
-
-						visitorCommand.ExecuteNonQuery();
-					}
-				}
-			}
-
-			catch (Exception ex)
-			{
-				errorMsg = ex.Message;
-				return;
-			}
-
-			foreach (FieldInfo field in fields)
-			{
-				if (field.FieldType == typeof(string)) {field.SetValue(info, "");}
-				else { field.SetValue(info, null); }
-				
-			}
-			successMsg = "New User Added";
-
-			Response.Redirect("/Index");
-
-		}
-	}
-
-	public class ZooProfileInfo
-	{
-		public string UserId;
-		public string Username;
-		public string PasswordHash;
-		public string IsActive;
-		public string CreationDate;
-		public string PhoneNumber;
-		public string Fname;
-		public string Lname;
-		public DateTime Bday;
-	}
+    }
+  }
 }

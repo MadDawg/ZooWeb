@@ -6,77 +6,38 @@ using System.Reflection;
 using Microsoft.CodeAnalysis;
 using System.Linq;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.AmenitySales
 {
   public class EditModel : PageModel
   {
-    public AmenitytSalesInfo info = new AmenitytSalesInfo();
-    public List<EmployeeListTable> employeeList = new List<EmployeeListTable>();
+    public AmenitySaleInfo? info = new AmenitySaleInfo();
+    public List<ListTable> employeeList = new List<ListTable>();
     public string errorMsg = "";
     public string successMsg = "";
+    
+    private readonly AmenitySaleRepository _amenitySaleRepo;
+    private readonly EmployeeRepository _employeeRepo;
 
-    private readonly IDbConnectionFactory _factory;
-
-    public EditModel(IDbConnectionFactory factory)
-    {
-      _factory = factory;
+    public EditModel(AmenitySaleRepository amenitySaleRepo, EmployeeRepository employeeRepo){
+      _amenitySaleRepo = amenitySaleRepo;
+      _employeeRepo = employeeRepo;
     }
 
-    public void OnGet()
+    public async Task<IActionResult> OnGet()
     {
-      /*String Location_ID = Request.Query["id"];
-        if (Location_ID == null || Location_ID == "") { errorMsg = "y tho?"; return; };*/
-      String SaleId = Request.Query["id"];
-
-      using (SqlConnection connection = _factory.CreateConnection())
-      {
-        connection.Open();
-        String sql = "SELECT * " +
-          "FROM amenitySales " +
-          "WHERE SaleId=@SaleId";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          command.Parameters.AddWithValue("@SaleId", SaleId);
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            if (reader.Read())
-            {
-              info.EID = reader.GetInt32(0).ToString();
-              info.LocationID = reader.GetInt32(1).ToString();
-              info.SaleType = reader.GetString(2);
-              info.SaleDate = reader.GetDateTime(3).ToString("yyyy-MM-dd");
-              info.SaleTotal = reader.GetDecimal(4).ToString();
-              info.SaleId = reader.GetInt64(5).ToString();
-            }
-          }
-        }
-        
-        sql = "SELECT EmployeeId, FName, Lname "
-          + "FROM employee";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              employeeList.Add(new EmployeeListTable
-                  {
-                  Key = reader.GetInt32(0).ToString(),
-                  Display = reader.GetString(2) + ", " + reader.GetString(1)
-                  });
-            }
-          }
-        }
-      }
+      String saleId = Request.Query["id"];
+      info = await _amenitySaleRepo.GetByIdAsync(int.Parse(saleId));
+      employeeList = await _employeeRepo.GetAllMinimalAsync();
+      return Page();
     }
-    public void OnPost()
+
+    public async Task<IActionResult> OnPost()
     {
-
-
-      info.EID = Request.Form["EID"];
-      info.LocationID = Request.Form["LocationID"];
+      info.EmployeeId = Request.Form["EID"];
+      info.LocationId = Request.Form["LocationID"];
       info.SaleType = Request.Form["SaleType"];
       //info.SaleDate = Request.Form["SaleDate"];
       info.SaleTotal = Request.Form["Total"];
@@ -90,35 +51,18 @@ namespace ZooWeb.Pages.AmenitySales
         if (!excludedNames.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
         {
           errorMsg = "Missing field: " + field.Name;
-          return;
+          return Page();
         }
       }
 
       try
       {
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-
-          string sql = "UPDATE amenitySales " +
-            "SET Eid=@EID, SaleType=@SaleType, LocationID=@LocationID " +
-            "WHERE SaleId=@SaleId";
-
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            command.Parameters.AddWithValue("@Eid", info.EID);
-            command.Parameters.AddWithValue("@LocationID", info.LocationID);
-            command.Parameters.AddWithValue("@SaleType", info.SaleType);
-            command.Parameters.AddWithValue("@SaleId", info.SaleId);
-
-            command.ExecuteNonQuery();
-          }
-        }
+        await _amenitySaleRepo.UpdateAsync(info);
       }
       catch (Exception ex)
       {
         errorMsg = ex.Message;
-        return;
+        return Page(); 
       }
 
 
@@ -128,7 +72,7 @@ namespace ZooWeb.Pages.AmenitySales
       }
       successMsg = "Amenity Sale Updated";
 
-      Response.Redirect("/AmenitySales/Index");
+      return RedirectToPage("/AmenitySales/Index");
     }
   }
 }

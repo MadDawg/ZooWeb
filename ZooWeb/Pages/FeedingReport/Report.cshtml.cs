@@ -5,53 +5,38 @@ using ZooWeb.Pages.Revenue;
 using Microsoft.Data.SqlClient;
 using System.Data;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.FeedingReport
 {
 	public class ReportModel : PageModel
 	{
-    public List<AnimalListTable> animalList = new List<AnimalListTable>();
+    public List<ListTable> animalList = new List<ListTable>();
+		public List<FeedingReportInfo> reportInfoList = new List<FeedingReportInfo>();
 		public string errorMsg = "";
 		public string successMsg = "";
     
-    private readonly IDbConnectionFactory _factory;
+    private readonly FeedingReportRepository _feedingReportRepo;
+    private readonly AnimalRepository _animalRepo;
 
-    public ReportModel(IDbConnectionFactory factory)
+    public ReportModel(FeedingReportRepository feedingReportRepo, AnimalRepository animalRepo)
     {
-      _factory = factory;
+      _animalRepo = animalRepo;
+      _feedingReportRepo = feedingReportRepo;
     }
-
 
 		[DataType(DataType.Date)]
 		public DateTime startDate { get; set; }
 		public DateTime endDate { get; set; }
-		public void OnGet()
+		
+    public async Task <IActionResult> OnGet()
 		{
-			using (SqlConnection connection = _factory.CreateConnection())
-			{
-				connection.Open();
-				String sql = "SELECT Animal_ID, Name, Common_name "
-					+ "FROM animal";
-				using (SqlCommand command = new SqlCommand(sql, connection))
-				{
-					using (SqlDataReader reader = command.ExecuteReader())
-					{
-						while (reader.Read())
-						{
-							animalList.Add(new AnimalListTable
-							{
-								Key = reader.GetInt32(0).ToString(),
-								Display = reader.GetString(1) + " (" + reader.GetString(2) + ")"
-							});
-						}
-					}
-				}
-			}
+      animalList = await _animalRepo.GetAllMinimalAsync();
+      return Page();
 		}
 
-		public List<animalInfo> animalInfo = new List<animalInfo>();
-		public void OnPost()
+		public async Task <IActionResult> OnPost()
 		{
 			try
 			{
@@ -62,36 +47,7 @@ namespace ZooWeb.Pages.FeedingReport
 					throw new Exception("Start date cannot exceed end date.");
 				}
 
-				using (SqlConnection connection = _factory.CreateConnection())
-				{
-					connection.Open();
-					string sql = "SELECT animal.Animal_ID, Name, Meal, Portion, Schedule_days, Schedule_time, Status," +
-                        " Location_ID FROM feeding_pattern, animal WHERE animal.Animal_Id = @aid AND feeding_pattern.Animal_Id = @aid";
-
-
-					using (SqlCommand command = new SqlCommand(sql, connection))
-					{
-						command.Parameters.AddWithValue("@aid", AnimalId);
-
-						using (SqlDataReader reader = command.ExecuteReader())
-						{
-							while (reader.Read())
-							{
-								animalInfo info = new animalInfo();
-								info.AnimalId = reader.GetInt32(0).ToString();
-								info.Name = reader.GetString(1);
-								info.Meal = reader.GetString(2);
-								info.Portion = reader.GetDecimal(3).ToString();
-								info.Schedule_days = reader.GetString(4);
-								info.Schedule_time = reader.GetTimeSpan(5).ToString();
-								info.Status = reader.GetString(6);
-								info.Location = reader.GetInt64(7).ToString();
-
-								animalInfo.Add(info);
-							}
-						}
-					}
-				}
+        reportInfoList = await _feedingReportRepo.GetByIdAsync(int.Parse(AnimalId));
 			}
 			catch (Exception ex)
 			{
@@ -104,24 +60,7 @@ namespace ZooWeb.Pages.FeedingReport
 					errorMsg = ex.Message;
 				}
 			}
+			return Page();
 		}
-	}
-	
-  public class AnimalListTable
-	{
-		public string Key { get; set; }
-		public string Display { get; set; }
-	}
-
-	public class animalInfo
-	{
-		public string AnimalId;
-		public string Name;
-		public string Meal;
-		public string Portion;
-		public string Schedule_days;
-		public string Schedule_time;
-		public string Status;
-		public string Location;
 	}
 }

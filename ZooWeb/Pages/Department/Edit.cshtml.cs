@@ -4,98 +4,68 @@ using ZooWeb.Pages.Department;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.Department
 {
-    public class EditModel : PageModel
+  public class EditModel : PageModel
+  {
+    public DepartmentInfo info = new DepartmentInfo();
+    public string errorMsg = "";
+    public string successMsg = "";
+
+    private readonly DepartmentRepository _repo;
+
+    public EditModel(DepartmentRepository repo){
+      _repo = repo;
+    }
+
+    public async Task<IActionResult> OnGet()
     {
-        public DepartmentInfo info = new DepartmentInfo();
-        public string errorMsg = "";
-        public string successMsg = "";
+      String Department_number = Request.Query["id"];
+      if (Department_number == null || Department_number == "") { errorMsg = "y tho?"; return Page(); };
 
-        private readonly IDbConnectionFactory _factory;
+      info = await _repo.GetByIdAsync(short.Parse(Department_number));
+      return Page();
+    }
 
-        public EditModel(IDbConnectionFactory factory)
+    public async Task<IActionResult> OnPost()
+    {
+      info.DepartmentNumber = Request.Form["Department_number"];
+      info.Name = Request.Form["Name"];
+
+      FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+      string[] excludedFields = { "Dnumber" };
+
+      foreach (FieldInfo field in fields)
+      {
+        object fieldValue = field.GetValue(info);
+        if (!excludedFields.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
         {
-          _factory = factory;
+          errorMsg = "Missing required field: " + field.Name;
+          return Page();
         }
+      }
 
-		public void OnGet()
-		{
-			String Department_number = Request.Query["id"];
-			if (Department_number == null || Department_number == "") { errorMsg = "y tho?"; return; };
-
-			using (SqlConnection connection = _factory.CreateConnection())
-			{
-				connection.Open();
-				String sql = "SELECT * FROM department WHERE Dnumber=@Department_number";
-				using (SqlCommand command = new SqlCommand(sql, connection))
-				{
-					command.Parameters.AddWithValue("@Department_number", Department_number);
-					using (SqlDataReader reader = command.ExecuteReader())
-					{
-						if (reader.Read())
-						{
-							info.Dnumber = reader.GetInt16(0).ToString();
-							info.Name = reader.GetString(1);
-						}
-					}
-				}
-			}
-		}
-
-		public void OnPost()
-		{
-
-			info.Dnumber = Request.Form["Department_number"];
-			info.Name = Request.Form["Name"];
-
-			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
-			string[] excludedFields = { "Dnumber" };
-
-			foreach (FieldInfo field in fields)
-			{
-				object fieldValue = field.GetValue(info);
-				if (!excludedFields.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
-				{
-					errorMsg = "Missing required field: " + field.Name;
-					return;
-				}
-			}
-
-			try
-			{
-			  using (SqlConnection connection = _factory.CreateConnection())
-				{
-					connection.Open();
-					string sql = "UPDATE Department " +
-						"SET Name=@Name " + 
-						"WHERE Dnumber=@DNumber";
-
-					using (SqlCommand command = new SqlCommand(sql, connection))
-					{
-						command.Parameters.AddWithValue("@Dnumber", info.Dnumber);
-						command.Parameters.AddWithValue("@Name", info.Name);
-
-						command.ExecuteNonQuery();
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				errorMsg = ex.Message;
-				return;
-			}
+      try
+      {
+        await _repo.UpdateAsync(info);
+      }
+      catch (Exception ex)
+      {
+        errorMsg = ex.Message;
+        return Page();
+      }
 
 
-			foreach (FieldInfo field in fields)
-			{
-				field.SetValue(info, "");
-			}
-			successMsg = "Department Updated";
+      foreach (FieldInfo field in fields)
+      {
+        field.SetValue(info, "");
+      }
+      successMsg = "Department Updated";
 
-			Response.Redirect("/Department/Index");
-		}
-	}
+      return RedirectToPage("/Department/Index");
+    }
+  }
 }

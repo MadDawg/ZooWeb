@@ -4,8 +4,9 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.Reflection;
-using ZooWeb.Pages.Employees;
+// using ZooWeb.Pages.Employees;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.Revenue
@@ -16,28 +17,31 @@ namespace ZooWeb.Pages.Revenue
     public string successMsg = "";
     public string source = "";
     public string eid;
-    public decimal RevenueTotal = 0;
+    public decimal revenueTotal = 0;
+    
+    public List<RevenueInfo> listRevenue = new List<RevenueInfo>();
 
-    private readonly IDbConnectionFactory _factory;
+    private readonly RevenueRepository _repo;
 
-    public ReportModel(IDbConnectionFactory factory)
-    {
-      _factory = factory;
+    public ReportModel(RevenueRepository repo){
+      _repo = repo;
     }
-
 
     [DataType(DataType.Date)]
     public DateTime startDate { get; set; }
     public DateTime endDate { get; set; }
-    public void OnGet()
+    public async Task<IActionResult> OnGet()
     {
+      return Page();
     }
 
-    public List<revenueInfo> listRevenue = new List<revenueInfo>();
-    public void OnPost() 
+    public async Task<IActionResult> OnPost() 
     {
       try
       {
+        // TODO: TryParse here to avoid checking for FormatException later
+        // move this outside of try block
+        // date range does not need to throw
         startDate = DateTime.Parse(Request.Form["start"]);
         endDate = DateTime.Parse(Request.Form["end"]);
         eid = Request.Form["eid"];
@@ -47,46 +51,9 @@ namespace ZooWeb.Pages.Revenue
         {
           throw new Exception("Start date cannot exceed end date.");
         }
-
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-          string sql = "SELECT * FROM Revenue WHERE RevenueDate >= @StartDate AND RevenueDate <= @EndDate";
-
-          if (eid != null)
-          {
-            sql = sql + " AND EmployeeId=@Eid";
-          }
-          if (source != "Any")
-          {
-            sql = sql + " AND ReceiptSource=@Src";
-          }
-
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            command.Parameters.AddWithValue("@StartDate", startDate);
-            command.Parameters.AddWithValue("@EndDate", endDate);
-            if (source != "") command.Parameters.AddWithValue("@Src", source);
-            if (eid != null) command.Parameters.AddWithValue("@Eid", int.Parse(eid));
-
-            using (SqlDataReader reader = command.ExecuteReader())
-            {
-              while (reader.Read())
-              {
-                revenueInfo info = new revenueInfo();
-                info.Total = reader.GetDecimal(0).ToString();
-                info.ReceiptSource = reader.GetString(1);
-                info.ReceiptNum = reader.GetString(2);
-                info.RevenueDate = reader.GetDateTime(3).ToString();
-                if (reader.GetInt32(4) == null) { info.Eid = ""; }
-                else { info.Eid = reader.GetInt32(4).ToString(); }
-
-                RevenueTotal = RevenueTotal + reader.GetDecimal(0);
-
-                listRevenue.Add(info);
-              }
-            }
-          }
+        listRevenue = await _repo.GetFilteredAsync(startDate, endDate, eid, source);
+        foreach(var item in listRevenue){
+          revenueTotal += Convert.ToDecimal(item.Total); //TODO: just store a decimal in the data model instead...
         }
       }
       catch (Exception ex)
@@ -100,6 +67,7 @@ namespace ZooWeb.Pages.Revenue
           errorMsg = ex.Message;
         }
       }
+      return Page(); //TODO: is this what we are supposed to be returning in every instance?
     }
   }
 }

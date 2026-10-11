@@ -6,81 +6,41 @@ using Isopoh.Cryptography.Argon2;
 using System.Data.SqlTypes;
 using System.Linq;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.ZooUsers
 {
   public class EditModel : PageModel
   {
-    public List<RoleListTable> userRoleList = new List<RoleListTable>();
+    private readonly ZooUserRepository _zooUserRepo;
+    private readonly ZooUserRoleRepository _zooUserRoleRepo;
+    
+    public List<ListTable> userRoleList = new List<ListTable>();
     public ZooUserInfo info = new ZooUserInfo();
+    
     public string errorMsg = "";
     public string successMsg = "";
-
-    private readonly IDbConnectionFactory _factory;
-
-    public EditModel(IDbConnectionFactory factory)
+    
+    public EditModel(ZooUserRepository zooUserRepo, ZooUserRoleRepository zooUserRoleRepo)
     {
-      _factory = factory;
+      _zooUserRepo = zooUserRepo;
+      _zooUserRoleRepo = zooUserRoleRepo;
     }
 
-    public void OnGet()
+    public async Task<IActionResult> OnGet()
     {
       String UserId = Request.Query["id"];
       // TODO: actually use this (addresses race condition)
-      if (UserId == null || UserId == "") { errorMsg = "y tho?"; return; };
+      if (UserId == null || UserId == "") { errorMsg = "y tho?"; return Page(); };
 
-      using (SqlConnection connection = _factory.CreateConnection())
-      {
-        connection.Open();
-        String sql = "SELECT * FROM zoo_user " +
-          "WHERE UserId=@UserId";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          command.Parameters.AddWithValue("@UserId", UserId);
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            if (reader.Read())
-            {
-              info.UserId = reader.GetInt32(0).ToString();
-              info.Username = reader.GetString(1);
-              info.PasswordHash = reader.GetString(2);
-              if (reader.GetBoolean(3)) { info.IsActive = "enabled"; }
-              else { info.IsActive = "disabled";  }							
-              info.CreationDate = reader.GetDateTime(5).ToString();
-              try
-              {
-                info.UserRole = reader.GetString(4);
-              }
-              catch (SqlNullValueException)
-              {
-                info.UserRole = "-";
-              }
-            }
-          }
-        }
+      info = await _zooUserRepo.GetByIdAsync(int.Parse(UserId)); 
+      userRoleList = await _zooUserRoleRepo.GetAllAsync();
 
-        sql = "SELECT RoleName "
-          + "FROM zoo_user_role " +
-          "WHERE RoleName <> 'system'";
-        using (SqlCommand command = new SqlCommand(sql, connection))
-        {
-          using (SqlDataReader reader = command.ExecuteReader())
-          {
-            while (reader.Read())
-            {
-              string roleName = reader.GetString(0);
-              userRoleList.Add(new RoleListTable
-                  {
-                  Key = roleName,
-                  Display = roleName
-                  });
-            }
-          }
-        }
-      }
+      return Page();
     }
-    public void OnPost()
+    
+    public async Task<IActionResult> OnPost()
     {
       //must add check for null later
       info.UserId = Request.Form["UserId"];
@@ -102,57 +62,27 @@ namespace ZooWeb.Pages.ZooUsers
         if (!excludedFields.Contains(field.Name) && (fieldValue == "" || fieldValue == null))
         {
           errorMsg = "Missing field: " + field.Name;
-          return;
+          return Page();
         }
       }
 
       try
       {
-        using (SqlConnection connection = _factory.CreateConnection())
-        {
-          connection.Open();
-          string sql = "UPDATE zoo_user " +
-            "SET Username=@Username, IsActive=@Status ";
-          if (!String.IsNullOrEmpty(info.PasswordHash)) {
-            sql +=  ", PasswordHash=@Password ";
-          }
-          if (!String.IsNullOrEmpty(info.UserRole))
-          {
-            sql += ", UserRole=@UserRole ";
-          }
-          sql += "WHERE UserId=@UserId";
-
-          using (SqlCommand command = new SqlCommand(sql, connection))
-          {
-            command.Parameters.AddWithValue("@UserId", info.UserId);
-            command.Parameters.AddWithValue("@Username",info.Username);
-            if (!String.IsNullOrEmpty(info.PasswordHash))
-            {
-              command.Parameters.AddWithValue("@Password", info.PasswordHash);
-            }
-            if (!String.IsNullOrEmpty(info.UserRole))
-            {
-              command.Parameters.AddWithValue("@UserRole", info.UserRole);
-            }
-            command.Parameters.AddWithValue("@Status", (info.IsActive == "enabled"));
-
-            command.ExecuteNonQuery();
-          }
-        }
+        await _zooUserRepo.UpdateAsync(info);
       }
       catch (Exception ex)
       {
         errorMsg = ex.Message;
-        return;
+        return Page();
       }
-
+      // TODO: what was this for again??
       foreach (FieldInfo field in fields)
       {
         field.SetValue(info, "");
       }
       successMsg = "User Updated";
 
-      Response.Redirect("/ZooUsers/Index");
+      return RedirectToPage("/ZooUsers/Index");
     }
   }
 }

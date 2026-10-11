@@ -9,7 +9,7 @@ services:
     depends_on: db
     environment:
       ASPNETCORE_ENVIRONMENT: "${ENV_TYPE:-Production}"
-      ConnectionStrings__DefaultConnection: "${CONNECTION_STRING?:CONNECTION_STRING must be set}"
+      ConnectionStrings__DefaultConnection: "${CONNECTION_STRING:?CONNECTION_STRING must be set}"
 
   db:
     image: mcr.microsoft.com/mssql/server:${MSSQL_TAG:-2025-latest}

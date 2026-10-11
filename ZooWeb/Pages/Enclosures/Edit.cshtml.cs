@@ -3,102 +3,70 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Data.SqlClient;
 using System.Reflection;
 using ZooWeb.Data;
+using ZooWeb.Data.Entities;
 
 
 namespace ZooWeb.Pages.Enclosures
 {
-	public class EditModel : PageModel
-	{
-		public EnclosureInfo info = new EnclosureInfo();
-		public string errorMsg = "";
-		public string successMsg = "";
+  public class EditModel : PageModel
+  {
+    public EnclosureInfo info = new EnclosureInfo();
+    public string errorMsg = "";
+    public string successMsg = "";
 
-    private readonly IDbConnectionFactory _factory;
+    private readonly EnclosureRepository _repo;
 
-    public EditModel(IDbConnectionFactory factory)
+    public EditModel(EnclosureRepository repo)
     {
-      _factory = factory;
+      _repo = repo;
     }
 
-		public void OnGet()
-		{
-			String LocationId = Request.Query["id"];
-			// TODO: actually use this (addresses race condition)
-			if (LocationId == null || LocationId == "") { errorMsg = "y tho?"; return; };
+    public async Task<IActionResult> OnGet()
+    {
+      String LocationId = Request.Query["id"];
+      // TODO: actually use this (addresses race condition)
+      if (LocationId == null || LocationId == "") { errorMsg = "y tho?"; return Page(); };
 
-			using (SqlConnection connection = _factory.CreateConnection())
-			{
-				connection.Open();
-				String sql = "SELECT * FROM Enclosure WHERE LocationID=@LocationId";
-				using (SqlCommand command = new SqlCommand(sql, connection))
-				{
-					command.Parameters.AddWithValue("@LocationId", LocationId);
-					using (SqlDataReader reader = command.ExecuteReader())
-					{
-						if (reader.Read())
-						{
-							info.LocationID = reader.GetInt64(0).ToString();
-							info.Type = reader.GetString(1);
-							info.Capacity = reader.GetInt32(2).ToString();
-							info.Occupant_Num = reader.GetInt32(3).ToString();
-						}
-					}
-				}
-			}
-		}
-		public void OnPost()
-		{
-			//must add check for null later
-			info.LocationID = Request.Form["LocationId"];
-			info.Type = Request.Form["Type"];
-			info.Capacity = Request.Form["Capacity"];
-			info.Occupant_Num = Request.Form["OccupantNum"];
+      info = await _repo.GetByIdAsync(int.Parse(LocationId));
+      return Page();
+    }
+    public async Task<IActionResult> OnPost()
+    {
+      //must add check for null later
+      info.LocationId = Request.Form["LocationId"];
+      info.Type = Request.Form["Type"];
+      info.Capacity = Request.Form["Capacity"];
+      info.OccupantNumber = Request.Form["OccupantNum"];
 
-			FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+      FieldInfo[] fields = info.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
 
-			foreach (FieldInfo field in fields)
-			{
-				object fieldValue = field.GetValue(info);
-				if ((fieldValue == "" || fieldValue == null))
-				{
-					errorMsg = "All fields are required";
-					return;
-				}
-			}
+      foreach (FieldInfo field in fields)
+      {
+        object fieldValue = field.GetValue(info);
+        if ((fieldValue == "" || fieldValue == null))
+        {
+          errorMsg = "All fields are required";
+          return Page();
+        }
+      }
 
-			try
-			{
-			  using (SqlConnection connection = _factory.CreateConnection())
-				{
-					connection.Open();
-					string sql = "UPDATE Enclosure " +
-						"SET Type=@Type, Capacity=@Capacity, Occupant_Num=@OccupantNum " +
-						"WHERE LocationID=@LocationId";
+      try
+      {
+        await _repo.UpdateAsync(info);
+      }
+      catch (Exception ex)
+      {
+        errorMsg = ex.Message;
+        return Page();
+      }
 
-					using (SqlCommand command = new SqlCommand(sql, connection))
-					{
-						command.Parameters.AddWithValue("@LocationId", info.LocationID);
-						command.Parameters.AddWithValue("@Type", info.Type);
-						command.Parameters.AddWithValue("@Capacity", info.Capacity);
-						command.Parameters.AddWithValue("@OccupantNum", info.Occupant_Num);
+      foreach (FieldInfo field in fields)
+      {
+        field.SetValue(info, "");
+      }
+      successMsg = "Enclosure Updated";
 
-						command.ExecuteNonQuery();
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				errorMsg = ex.Message;
-				return;
-			}
-
-			foreach (FieldInfo field in fields)
-			{
-				field.SetValue(info, "");
-			}
-			successMsg = "Enclosure Updated";
-
-			Response.Redirect("/Enclosures/Index");
-		}
-	}
+      return RedirectToPage("/Enclosures/Index");
+    }
+  }
 }

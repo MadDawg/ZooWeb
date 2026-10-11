@@ -18,7 +18,7 @@
 <form method="POST">
     <div class="row mb-3">
         <div class="col-sm-6">
-            <input type="hidden" class="form-control" name="Animal_Id" value="@Model.info.Animal_Id">
+            <input type="hidden" class="form-control" name="Animal_Id" value="@Model.info.AnimalId">
         </div>
     </div>
     <div class="row mb-3">
@@ -30,13 +30,13 @@
     <div class="row mb-3">
         <label class="col-sm-3 col-form-label">Scientific Name</label>
         <div class="col-sm-6">
-            <input type="text" class="form-control" name="Scientific_name" value="@Model.info.Scientific_name">
+            <input type="text" class="form-control" name="Scientific_name" value="@Model.info.ScientificName">
         </div>
     </div>
     <div class="row mb-3">
         <label class="col-sm-3 col-form-label">Common Name</label>
         <div class="col-sm-6">
-            <input type="text" class="form-control" name="Common_name" value="@Model.info.Common_name">
+            <input type="text" class="form-control" name="Common_name" value="@Model.info.CommonName">
         </div>
     </div>
     <div class="row mb-3">
@@ -60,7 +60,7 @@
     <div class="row mb-3">
         <label class="col-sm-3 col-form-label">Birth Date</label>
         <div class="col-sm-6">
-            <input type="date" class="form-control" name="Birth_date" value="@Model.info.Birth_date.ToString("yyyy-MM-dd")">
+            <input type="date" class="form-control" name="Birth_date" value="@Model.info.BirthDate.ToString("yyyy-MM-dd")">
         </div>
     </div>
     <div class="row mb-3">
@@ -84,10 +84,10 @@
     <div class="row mb-3">
         <label class="col-sm-3 col-form-label">Location</label>
         <div class="col-sm-6">
-            <select name="Location_ID" class="form-control" value="@Model.info.Location_Id">
-                @foreach (EnclosureListTable item in Model.enclosureList)
+            <select name="Location_ID" class="form-control" value="@Model.info.LocationId">
+                @foreach (var item in Model.enclosureList)
                 {
-                    if (item.Key == Model.info.Location_Id)
+                    if (item.Key == Model.info.LocationId)
                     {
                         <option value="@(item.Key)" selected="selected">@item.Display</option>
                     }

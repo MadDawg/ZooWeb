@@ -18,7 +18,7 @@
 <form method="POST">
 	<div class="row mb-3">
 		<div class="col-sm-6">
-			<input type="hidden" class="form-control" name="TicketID" value="@Model.info.TicketID">
+			<input type="hidden" class="form-control" name="TicketID" value="@Model.info.TicketId">
 		</div>
 	</div>
 	<div class="row mb-3">
@@ -35,9 +35,9 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Employee ID</label>
 		<div class="col-sm-6">
-			<select class="form-control" name="EmployeeID" value="@Model.info.EmployeeID">
+			<select class="form-control" name="EmployeeID" value="@Model.info.EmployeeId">
 				<option value="">-</option>
-				@foreach (ListTable item in Model.employeeList)
+				@foreach (var item in Model.employeeList)
 				{
 					<option value="@(item.Key)">@item.Display</option>
 				}
@@ -47,9 +47,9 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Visitor Phone Number</label>
 		<div class="col-sm-6">
-			<select class="form-control" name="VisitorPn" value="@Model.info.VisitorPn">
+			<select class="form-control" name="VisitorPn" value="@Model.info.VisitorPhoneNumber">
 				<option value="">-</option>
-				@foreach (ListTable item in Model.visitorPnList)
+				@foreach (var item in Model.visitorPnList)
 				{
 					<option value="@(item.Key)">@item.Display</option>
 				}

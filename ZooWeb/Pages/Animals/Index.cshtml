@@ -23,24 +23,24 @@
 @foreach (var item in Model.listAnimals)
 {
   <tr>
-    <td>@item.Animal_Id</td>
+    <td>@item.AnimalId</td>
     <td>@item.Name</td>
-    <td>@item.Scientific_name</td>
-    <td>@item.Common_name</td>
+    <td>@item.ScientificName</td>
+    <td>@item.CommonName</td>
     <td>@item.Sex</td>
-    <td>@item.Birth_date.ToString("yyyy-MM-dd")</td>
+    <td>@item.BirthDate.ToString("yyyy-MM-dd")</td>
     <td>@item.Status</td>
-    <td>@item.Location_Id</td>
+    <td>@item.LocationId</td>
     <td>
-    <a class='btn btn-primary btn-sm' href="/Animals/Edit?id=@item.Animal_Id">Edit</a>
-    <a id='deleteAnchor_@item.Animal_Id' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.Animal_Id, true)">Toggle</a>
-    <span id="confirmDeleteAnchor_@item.Animal_Id" style="display:none">
+    <a class='btn btn-primary btn-sm' href="/Animals/Edit?id=@item.AnimalId">Edit</a>
+    <a id='deleteAnchor_@item.AnimalId' class='btn btn-danger btn-sm' onclick="confirmDelete(@item.AnimalId, true)">Toggle</a>
+    <span id="confirmDeleteAnchor_@item.AnimalId" style="display:none">
     <span>Are you sure?</span>
     <form method="post" asp-page-handler="ToggleStatus" style="display:inline;">
-    <input type="hidden" name="id" value="@item.Animal_Id" />
+    <input type="hidden" name="id" value="@item.AnimalId" />
     <button type="submit" class="btn btn-danger">Yes</button>
     </form>
-    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.Animal_Id', false)">No</a>
+    <a href="#" class="btn btn-primary" onclick="confirmDelete('@item.AnimalId', false)">No</a>
     </span>
     </td>
     </tr>

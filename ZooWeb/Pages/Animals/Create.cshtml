@@ -18,7 +18,7 @@
 <form method="POST">
 	<div class="row mb-3">
 		<div class="col-sm-6">
-			<input type="hidden" class="form-control" name="Animal_Id" value="@Model.info.Animal_Id">
+			<input type="hidden" class="form-control" name="Animal_Id" value="@Model.info.AnimalId">
 		</div>
 	</div>
 	<div class="row mb-3">
@@ -30,13 +30,13 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Scientific Name</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Scientific_name" value="@Model.info.Scientific_name">
+			<input type="text" class="form-control" name="Scientific_name" value="@Model.info.ScientificName">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Common Name</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Common_name" value="@Model.info.Common_name">
+			<input type="text" class="form-control" name="Common_name" value="@Model.info.CommonName">
 		</div>
 	</div>
 	<div class="row mb-3">
@@ -51,7 +51,7 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Birth Date</label>
 		<div class="col-sm-6">
-			<input type="date" class="form-control" name="Birth_date" value="@Model.info.Birth_date">
+			<input type="date" class="form-control" name="Birth_date" value="@Model.info.BirthDate">
 		</div>
 	</div>
 	<div class="row mb-3">
@@ -68,7 +68,7 @@
 		<label class="col-sm-3 col-form-label">Location</label>
 		<div class="col-sm-6">
 			<select name="Location_ID" class="form-control">
-				@foreach (EnclosureListTable item in Model.enclosureList)
+				@foreach (var item in Model.enclosureList)
 				{
 					<option value="@(item.Key)">@item.Display</option>
 				}

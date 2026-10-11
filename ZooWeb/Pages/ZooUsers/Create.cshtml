@@ -33,7 +33,7 @@
 		<div class="col-sm-6">
 			<select name="Role" class="form-control">
 				<option value ="">-</option>
-				@foreach (RoleListTable item in Model.userRoleList)
+				@foreach (var item in Model.userRoleList)
 				{	
 					<option value="@(item.Key)">@item.Display</option>
 				}

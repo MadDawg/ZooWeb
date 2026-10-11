@@ -19,26 +19,26 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">First Name</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Fname" value="@Model.info.Fname">
+			<input type="text" class="form-control" name="Fname" value="@Model.info.FirstName">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Last Name</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Lname" value="@Model.info.Lname">
+			<input type="text" class="form-control" name="Lname" value="@Model.info.LastName">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Phone Number</label>
 		<div class="col-sm-6">
-			<input type="text" class="form-control" name="Phone_num" value="@Model.info.Phone_num">
+			<input type="text" class="form-control" name="Phone_num" value="@Model.info.PhoneNumber">
 		</div>
 	</div>
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Department</label>
 		<div class="col-sm-6">
-			<select class="form-control" name="Dno" value="@Model.info.Dno">
-				@foreach (ListTable item in Model.departmentList)
+			<select class="form-control" name="Dno" value="@Model.info.DepartmentNumber">
+				@foreach (var item in Model.departmentList)
 				{
 					<option value="@(item.Key)">@item.Display</option>
 				}
@@ -48,9 +48,9 @@
 	<div class="row mb-3">
 		<label class="col-sm-3 col-form-label">Supervisor</label>
 		<div class="col-sm-6">
-			<select class="form-control" name="Super_Eid" value="@Model.info.Super_Eid">
+			<select class="form-control" name="Super_Eid" value="@Model.info.SupervisorEmployeeId">
 				<option value="">-</option>
-				@foreach (ListTable item in Model.employeeList)
+				@foreach (var item in Model.employeeList)
 				{
 					<option value="@(item.Key)">@item.Display</option>
 				}
